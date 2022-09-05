@@ -1,0 +1,10 @@
+#!/bin/sh
+
+#a=$(nmcli -t -f name connection show --active)
+#echo -e "📶:$a"
+
+a=$(iwgetid -r)
+echo -e "📶:$a"
+
+
+

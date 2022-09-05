@@ -1,0 +1,28 @@
+#! /bin/sh
+
+a=$(echo -e "Dwmblocks\nSXHKD\nDWM" | dmenu )
+#echo $a
+if [ "$a" == "Dwmblocks" ]
+then
+  : '
+	b=$(ps -aux | grep "dwmblocks" |wc -l)
+	if [ "$b" -gt 1 ]
+	then
+		killall dwmblocks && dwmblocks 
+	else
+		dwmblocks
+	fi
+  '
+  killall dwmblocks 
+  dwmblocks &
+
+elif [ "$a" == "DWM" ]
+then
+  pkill -HUP dwm >/dev/null
+
+elif [ "$a" == "SXHKD" ]
+then
+	killall sxhkd 
+  sxhkd &
+
+fi

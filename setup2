@@ -1,0 +1,57 @@
+#!/bin/bash
+
+mkdir $HOME/wm
+cd wm
+git clone https://github.com/AnantStrange/dwm
+git clone https://github.com/AnantStrange/dwmblocks
+git clone https://github.com/AnantStrange/st
+git clone https://github.com/AnantStrange/dmenu
+
+
+git clone https://github.com/AnantStrange/dotfiles
+git clone https://github.com/AnantStrange/statusbar_scripts
+git clone https://github.com/AnantStrange/scripts
+git clone --depth 1 https://github.com/AnantStrange/Wallpapers.git & 
+
+sudo pacman -Syy
+cat scripts/dependency | sudo pacman -S --needed -
+
+mv scripts $HOME 
+
+cd dotfiles
+cp .xinitrc $HOME
+cp .zshrc $HOME
+cp .zprofile $HOME
+cp .alias $HOME
+mkdir -p $HOME/.config/sxhkd
+mkdir -p $HOME/.config/picom
+cp sxhkdrc $HOME/.config/sxhkd/
+cp picom.conf $HOME/.config/picom
+
+cat dependency|sudo pacman -S --needed -
+cd $HOME/wm
+
+cd dwm
+sudo make install > make_install.result 2>&1
+cd $HOME/wm
+
+cd dwmblocks
+sudo make install > make_install.result 2>&1
+cd $HOME/wm
+
+cd st
+sudo make install > make_install.result 2>&1
+cd $HOME/wm
+
+cd dmenu
+sudo make install > make_install.result 2>&1
+cd $HOME/wm
+
+fg
+
+mv Wallpaper $HOME
+
+
+
+
+

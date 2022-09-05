@@ -1,0 +1,17 @@
+#/bin/sh
+
+timedatectl set-ntp true
+pacstrap /mnt base linux linux-firmware zsh git
+genfstab -U /mnt >> /mnt/etc/fstab
+arch-chroot /mnt
+ln -sf /usr/share/zoneinfo/Indian/Maldives /etc/localtime
+hwclock --systohc
+echo "en_IN UTF-8">>/etc/locale.gen
+echo "en_US.UTF-8 UTF-8">>/etc/locale.gen
+locale-gen
+echo "LANG=en_US.UTF-8">/etc/locale.conf
+echo "archpc">/etc/hostname
+useradd -mU -s /usr/bin/zsh --password anant -G root,wheel,storage,video,audio anant
+
+
+

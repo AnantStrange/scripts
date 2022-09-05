@@ -1,0 +1,17 @@
+#!/bin/sh
+
+a=$(echo "" | dmenu -p "pass generate -c") 
+#pass generate -c "$a" 
+
+#echo "$a"
+#echo "$a" | awk '{print $2}'
+b=$(echo "$a" | awk '{print $2}')
+
+if [ -z "$b" ]
+then
+    pass generate -nc "$a" 
+else
+    pass generate -nc "$a" "$b"
+
+fi 
+

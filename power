@@ -1,0 +1,27 @@
+#!/bin/sh
+
+var=$(echo -e "Power-off\nReboot\nSuspend\nHibernate\nHybrid-sleep\nkill-dwm" | dmenu)
+#echo $var
+if [ "$var" == "Power-off" ];
+then
+	shutdown now
+elif [ "$var" == "Reboot" ];
+then
+  reboot
+
+elif [ "$var" == "kill-dwm" ];
+then
+	killall dwm
+
+elif [ "$var" == "Suspend" ];
+then
+	i3lock-fancy && systemctl suspend
+
+elif [ "$var" == "Hibernate" ];
+then
+	i3lock & systemctl hibernate
+
+elif [ "$var" == "Hybrid-sleep" ];
+then
+	i3lock & systemctl hybrid-sleep
+fi
