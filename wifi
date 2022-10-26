@@ -3,7 +3,7 @@
 #a=$(nmcli -t -f name connection show --active)
 #echo -e "📶:$a"
 
-a=$(iwgetid -r)
+a=$(iwgetid -r | cut -c1-8)
 echo -e "📶:$a"
 
 
