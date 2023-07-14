@@ -3,5 +3,5 @@
 a=$(df -h / | awk ' /[0-9]/ {print "Root :"$3 "/" $2}')
 b=$(df -h /home | awk ' /[0-9]/ {print "Home :"$3 "/" $2}')
 
-printf "%s & %s\n" "$a" "$b" 
+printf "%s %s\n" "$a" "$b" 
 
