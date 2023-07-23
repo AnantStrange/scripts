@@ -13,8 +13,7 @@ then
 		dwmblocks
 	fi
   '
-  killall dwmblocks 
-  dwmblocks &
+  killall dwmblocks && dwmblocks &
 
 elif [ "$a" == "DWM" ]
 then

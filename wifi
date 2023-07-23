@@ -1,6 +1,19 @@
 #!/bin/sh
 
-a=$(iwgetid -r | cut -c1-8)
-#echo -e "📶:$a"
-echo -e "📶:$a"
+is_down=$(ip a | grep wlp3s0 | grep -o DOWN)
+a="⛔"
+
+if [ -n '$is_down' ];
+then
+        is_usb=$(ip a | grep enp0 | grep -o ,UP)
+        if [ -n '$is_usb' ]
+        then
+                a=$(ip a | grep enp0 -m1 | cut -d ':' -f2)
+
+        fi
+else
+        a=$(iwgetid -r | cut -c1-8)
+fi
+
+echo -e ":$a"
 

@@ -21,10 +21,12 @@ esac
 case $BLOCK_BUTTON in
 	1) notify-send "This Month" "$(cal --color=always | sed "s/..7m/<b><span color=\"red\">/;s/..27m/<\/span><\/b>/")" && notify-send -t 7700 "Appointments" "$(calcurse -d60)" ;;
 	2) setsid -f "$TERMINAL" -e calcurse ;;
-	3) notify-send "📅 Time/date module" "\- Left click to show upcoming appointments for the next three days via \`calcurse -d60\` and show the month via \`cal\`
-- Middle click opens calcurse if installed" ;;
-	6) "$TERMINAL" -e "$EDITOR" "$0" ;;
+	3) notify-send "📅 Time/date module" "\-  6 was pressed " ;;
+	#6) "$TERMINAL" -e "$EDITOR" "$0" ;;
 esac
 
 #date "+%d %b %y (%a) $icon%I:%M%p"
-date "+%d-%b-(%a) $icon%R"
+a=$(date "+%d-%b-(%a) $icon%R")
+b=$(date -u +"%R")
+echo "$a,$b"
+
