@@ -11,17 +11,17 @@ then
 
 elif [ "$var" == "kill-dwm" ];
 then
-	killall dwmblocks & killall dwm
+	killall dwmblocks & killall dunst & killall dwm
 
 elif [ "$var" == "Suspend" ];
 then
-	i3lock-fancy && systemctl suspend
+	i3lock-fancy & systemctl suspend
 
 elif [ "$var" == "Hibernate" ];
 then
-	i3lock & systemctl hibernate
+	i3lock-fancy & systemctl hibernate
 
 elif [ "$var" == "Hybrid-sleep" ];
 then
-	i3lock & systemctl hybrid-sleep
+	i3lock-fancy & systemctl hybrid-sleep
 fi

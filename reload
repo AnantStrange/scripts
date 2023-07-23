@@ -1,6 +1,6 @@
 #! /bin/sh
 
-a=$(echo -e "Dwmblocks\nSXHKD\nDWM" | dmenu )
+a=$(echo -e "Dwmblocks\nSXHKD\nDWM\nDunst" | dmenu )
 #echo $a
 if [ "$a" == "Dwmblocks" ]
 then
@@ -15,10 +15,12 @@ then
   '
   killall dwmblocks && dwmblocks &
 
+elif [ "$a" == "Dunst" ]
+then
+        killall dunst && dunst &
 elif [ "$a" == "DWM" ]
 then
   pkill -HUP dwm >/dev/null
-
 elif [ "$a" == "SXHKD" ]
 then
 	killall sxhkd 
