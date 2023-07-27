@@ -1,0 +1,5 @@
+ssid=$(echo $(nmcli device wifi list)  | rg -o  ":..\s(.*?)\bIn" | awk '{ $1=$NF="";print}' | sort -u |dmenu -p "SSID :")
+
+nmcli device wifi connect $ssid
+
+
