@@ -1,19 +1,30 @@
 #!/bin/sh
 
-is_down=$(ip a | grep wlp3s0 | grep -o DOWN)
-a="⛔"
+#if [ -d "/sys/class/net/enp0s20f0u1/" ];
 
-if [ -n '$is_down' ];
+a=$(find /sys/class/net/enp0s2*)
+if [ ! -z "$a" ]
 then
-        is_usb=$(ip a | grep enp0 | grep -o ,UP)
-        if [ -n '$is_usb' ]
-        then
-                a=$(ip a | grep enp0 -m1 | cut -d ':' -f2)
-
-        fi
-else
-        a=$(iwgetid -r | cut -c1-8)
+        a=$(echo $a | cut -d"/" -f 5);
 fi
 
-echo -e ":$a"
+tmp=$(cat /sys/class/net/wlp3s0/operstate)
+if [ $tmp == 'up' ];
+then
+        b=$(iwgetid -r | cut -c1-8)
+fi
 
+#echo "a :"$a
+#echo "b :"$b
+
+if [ -n "$a" ];
+then
+        if [ -n "$b" ];
+        then
+                echo -e ":$a,$b"
+        else
+                echo -e ":$a"
+        fi
+else
+        echo -e ":$b"
+fi

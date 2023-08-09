@@ -1,0 +1,11 @@
+#!/bin/sh
+
+a=$(echo "" | dmenu -p "String >")
+if [ ! -z "$a" ];
+then
+    file=$(locate $a | dmenu -l 10 -p "File :")
+    mpv "$file"
+fi
+
+
+

@@ -1,3 +1,4 @@
+#!/bin/sh
 # Prints all batteries, their percentage remaining and an emoji corresponding
 # to charge status (🔌 for plugged up, 🔋 for discharging on battery, etc.).
 
@@ -35,34 +36,26 @@ for battery in /sys/class/power_supply/BAT?*; do
 done && printf "\\n"
 
 status=$(cat /sys/class/power_supply/BAT0/status)
-: '
-if [ "$capacity" -lt 10 ] && [ "$status" == "Discharging" ]
-then
-	notify-send -u critical "Warning Battery low\nplug in charger !!"
-fi
-
-if [ "$capacity" -lt 5 ] && [ "$status" == "Discharging" ]
-then
-	notify-send -u critical "Warning Battery low\nEntering hybrid-sleep!!"
-	i3lock-fancy && systemctl hybrid-sleep
-fi
-'
 
 if [ "$status" == "Discharging" ];
 then
-  if [ "$capacity" -lt 6 ];
+  if [ "$capacity" -lt 10 ];
 	then
-    set +xv
-    notify-send -u critical "Warning Battery low\nEntering hybrid-sleep!!" && \
-	    i3lock-fancy && systemctl hybrid-sleep
-  
-  elif [ "$capacity" -lt 16 ];
+    #set +xv
+    notify-send -u critical "Warning Battery low" "Entering hybrid-sleep!!";
+    sleep 60;
+    status=$(cat /sys/class/power_supply/BAT0/status)
+    if [ "$status" == "Discharging" ];
+    then
+        i3lock-fancy && systemctl hibernate
+    fi
+  elif [ "$capacity" -lt 25 ];
 	then
-		notify-send -u critical "Warning Battery low\nplug in charger !!"
+		notify-send -u critical "Warning Battery low" "Plug in charger !!"
 	fi 
 
 elif ([ "$status" == "Charging" ] || [ "$status" == "Full" ]) && [ "$capacity" -gt 97 ];
 then
-      notify-send "Charging almost full !!\nRemove charger."
+      notify-send "Charging almost full" "Remove charger."
 fi 
 

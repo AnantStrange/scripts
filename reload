@@ -1,29 +1,51 @@
 #! /bin/sh
 
-a=$(echo -e "Dwmblocks\nSXHKD\nDWM\nDunst" | dmenu )
-#echo $a
-if [ "$a" == "Dwmblocks" ]
-then
-  : '
-	b=$(ps -aux | grep "dwmblocks" |wc -l)
-	if [ "$b" -gt 1 ]
-	then
-		killall dwmblocks && dwmblocks 
-	else
-		dwmblocks
-	fi
-  '
-  killall dwmblocks && dwmblocks &
-
-elif [ "$a" == "Dunst" ]
-then
-        killall dunst && dunst &
-elif [ "$a" == "DWM" ]
-then
-  pkill -HUP dwm >/dev/null
-elif [ "$a" == "SXHKD" ]
-then
-	killall sxhkd 
-  sxhkd &
-
+shopt -s nocasematch
+if [ ! -z "$1" ];then
+        a=$1
+else
+        a=$(echo -e "Dwmblocks\nSXHKD\nDWM\nDunst\nTransmission\nI2P Router" | dmenu )
 fi
+
+case "$a" in 
+        "Dwmblocks")
+                killall dwmblocks;
+                dwmblocks &
+                ;;
+
+        "Dunst")
+                killall dunst;
+                dunst &
+                ;;
+
+        "DWM")
+                pkill -HUP dwm >> /tmp/dwm_log
+                ;;
+
+        "SXHKD")
+                out=$(killall sxhkd)
+                sxhkd &
+                ;;
+
+        "Transmission")
+                if [ ! -z "$(ps -aux | grep transmission | grep daemon)" ]
+                then
+                        out=$(systemctl restart transmission)
+                else
+                        out=$(systemctl start transmission)
+                fi
+                ;;
+
+        "I2P Router")
+                if [ -z "$(i2prouter status | grep not running)" ]
+                then
+                        out=$(i2prouter start)
+                else
+                        out=$(i2prouter stop) 
+                fi
+                ;;
+esac
+
+[ ! -z "$a" ] && [ ! -z "$out" ] && dunstify "$a" "$out"
+
+
