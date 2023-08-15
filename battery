@@ -3,60 +3,63 @@
 # to charge status (🔌 for plugged up, 🔋 for discharging on battery, etc.).
 
 case $BLOCK_BUTTON in
-	3) notify-send "🔋 Battery module" "🔋: discharging
-🛑: not charging
-♻: stagnant charge
-🔌: charging
-⚡: charged
-❗: battery very low!
-- Scroll to change adjust xbacklight." ;;
-	4) sudo light -A 5 ;;
-	5) sudo light -U 5 ;;
-	6) "$TERMINAL" -e "$EDITOR" "$0" ;;
+    3) notify-send "🔋 Battery module" "🔋: discharging
+        🛑: not charging
+        ♻: stagnant charge
+        🔌: charging
+        ⚡: charged
+        ❗: battery very low!
+        - Scroll to change adjust xbacklight." ;;
+    4) sudo light -A 5 ;;
+    5) sudo light -U 5 ;;
+    6) "$TERMINAL" -e "$EDITOR" "$0" ;;
 esac
 
 # Loop through all attached batteries and format the info
 for battery in /sys/class/power_supply/BAT?*; do
-	# If non-first battery, print a space separator.
-	[ -n "${capacity+x}" ] && printf " "
-	# Sets up the status and capacity
-	case "$(cat "$battery/status" 2>&1)" in
-		"Full") status="⚡" ;;
-		"Discharging") status="🔋" ;;
-		"Charging") status="🔌" ;;
-		"Not charging") status="🛑" ;;
-		"Unknown") status="♻️" ;;
-		*) exit 1 ;;
-	esac
-	capacity="$(cat "$battery/capacity" 2>&1)"
-	# Will make a warn variable if discharging and low
-	[ "$status" = "🔋" ] && [ "$capacity" -le 25 ] && warn="❗"
-	# Prints the info
-	printf "%s%s%d%%" "$status" "$warn" "$capacity"; unset warn
+    # If non-first battery, print a space separator.
+    [ -n "${capacity+x}" ] && printf " "
+    # Sets up the status and capacity
+    case "$(cat "$battery/status" 2>&1)" in
+        "Full") status="⚡" ;;
+        "Discharging") status="🔋" ;;
+        "Charging") status="🔌" ;;
+        "Not charging") status="🛑" ;;
+        "Unknown") status="♻️" ;;
+        *) exit 1 ;;
+    esac
+    capacity="$(cat "$battery/capacity" 2>&1)"
+    # Will make a warn variable if discharging and low
+    [ "$status" = "🔋" ] && [ "$capacity" -le 25 ] && warn="❗"
+    # Prints the info
+    printf "%s%s%d%%" "$status" "$warn" "$capacity"; unset warn
 done && printf "\\n"
 
 status=$(cat /sys/class/power_supply/BAT0/status)
 
 if [ "$status" == "Discharging" ];
 then
-  if [ "$capacity" -lt 10 ];
-	then
-    #set +xv
-    notify-send -u critical "Warning Battery low" "Entering hybrid-sleep!!";
-    sleep 60;
-    status=$(cat /sys/class/power_supply/BAT0/status)
-    if [ "$status" == "Discharging" ];
+    if [ "$capacity" -lt 10 ];
     then
-        i3lock-fancy
-        systemctl hybrid-sleep
-    fi
-  elif [ "$capacity" -lt 25 ];
-	then
-		notify-send -u critical "Warning Battery low" "Plug in charger !!"
-	fi 
+        seq 60 | while read number
+        do
+            notify-send  -h int:value:$number -h string:synchronous:progress "Battery Low" "Hybrid-Sleeping in"
+            sleep 1
+        done
+        dunctl close
+        status=$(cat /sys/class/power_supply/BAT0/status)
+        if [ "$status" == "Discharging" ];
+        then
+            i3lock-fancy & systemctl hybrid-sleep
+        fi
+
+    elif [ "$capacity" -lt 25 ];
+    then
+        notify-send -u critical "Warning Battery low" "Plug in charger !!"
+    fi 
 
 elif ([ "$status" == "Charging" ] || [ "$status" == "Full" ]) && [ "$capacity" -gt 97 ];
 then
-      notify-send "Charging almost full" "Remove charger."
+    notify-send "Charging full" "Remove charger."
 fi 
 

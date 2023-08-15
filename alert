@@ -1,4 +1,4 @@
 #!/bin/sh
 
-mpv --volume=100 ~/scripts/hey_listen.ogg > /dev/null
+mpv --volume=70 ~/scripts/hey_listen.ogg > /dev/null
 

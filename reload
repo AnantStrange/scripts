@@ -1,66 +1,73 @@
 #! /bin/sh
 
 shopt -s nocasematch
-if [ ! -z "$1" ];then
-        a=$1
-else
-        a=$(echo -e "Dwmblocks\nSXHKD\nDWM\nDunst\nTransmission\nI2P Router" | dmenu -p "Reload >")
-fi
+[ ! -z "$1" ] && a=$1 || a=$(echo -e "Dwmblocks\nSXHKD\nDWM\nDunst\nTransmission\nI2P Router" | dmenu -p "Reload >")
 
 case "$a" in 
-        "Dwmblocks")
-                killall dwmblocks;
-                dwmblocks &
-                ;;
+    "Dwmblocks")
+        if [ ! -z "$(pidof dwmblocks)" ]
+        then
+            a=$(echo -e "Restart\nKill" | dmenu -p "Dwmblocks is already running. What to do? >");
+            [ -z $a ] && exit;
+            [ $a == "Restart" ] && (killall dwmblocks; dwmblocks &) ||  (killall dwmblocks)
 
-        "Dunst")
-                killall dunst;
-                dunst &
-                ;;
+        else
+            a=$(echo -e "Start"| dmenu -p "Dwmblocks is not running. What to do? >")
+            [ -z $a ] && exit || (dwmblocks &)
+        fi
+        ;;
 
-        "DWM")
-                pkill -HUP dwm >> /tmp/dwm_log
-                ;;
+    "Dunst")
+        if [ ! -z "$(pidof dunst)" ]
+        then
+            a=$(echo -e "Restart\nKill" | dmenu -p "Dunst is already running. What to do? >")
+            [ -z $a ] && exit;
+            [ $a == "Restart" ] && (killall dunst;dunst &) || (killall dunst)
+        else
+            a=$(echo -e "Start"| dmenu -p "Dunst is not running. What to do? >")
+            [ -z $a ] && exit || (dunst &)
+        fi
+        ;;
 
-        "SXHKD")
-                killall -SIGUSR1 sxhkd
-                #out=$(killall sxhkd)
-                #sxhkd &
-                ;;
+    "DWM")
+        pkill -HUP dwm >> /tmp/dwm_log
+        ;;
 
-        "Transmission")
-                if [ ! -z "$(ps -aux | grep transmission | grep daemon)" ]
-                then
-                    a=$(echo -e "Restart\nStop")
-                    if [ $a == "Restart" ];then
-                        out=$(systemctl restart transmission)
-                    else
-                        out=$(systemctl stop transmission)
-                    fi
-                else
-                    a=$(echo -e "Start\nNothing"| dmenu -p "Transmission Daemon not running. What to do? >")
-                    if [ $a == "Start" ];then
-                        out=$(systemctl start transmission)
-                    fi
-                fi
-                ;;
+    "SXHKD")
+        if [ ! -z "$(pidof sxhkd)" ]
+        then
+            a=$(echo -e "Restart\nKill" | dmenu -p "Dunst is already running. What to do? >")
+            [ -z $a ] && exit;
+            if [ $a == "Restart" ] && (killall -SIGUSR1 sxhkd) || (killall dunst)
+        else
+            a=$(echo -e "Start"| dmenu -p "Dunst is not running. What to do? >")
+            [ -z $a ] && exit || (sxhkd &)
+        fi
+        ;;
 
-        "I2P Router")
-                if [ -z "$(i2prouter status | grep not running)" ]
-                then
-                    a=$(echo -e "Start\nNothing" | dmenu -p "I2P is not running. What to do? >")
-                    if [ $a == "Start" ];then
-                        out=$(i2prouter start)
-                    fi
-                else
-                    a=$(echo -e "Start\nNothing" | dmenu -p "I2P is running. What to do? >")
-                    if [ $a == "Nothing" ];then
-                        out=$(i2prouter stop) 
-                    fi
-                fi
-                ;;
+    "Transmission")
+        if [ ! -z "$(pidof transmission-daemon)" ]
+        then
+            a=$(echo -e "Restart\nStop")
+            [ -z $a ] && exit;
+            [ $a == "Restart" ] && (out=$(systemctl restart transmission)) || (out=$(systemctl stop transmission))
+        else
+            a=$(echo -e "Start"| dmenu -p "Transmission Daemon not running. What to do? >")
+            [ -z $a ] && exit || (out=$(systemctl start transmission))
+        fi
+        ;;
+
+    "I2P Router")
+        if [ -z "$(i2prouter status | grep not running)" ]
+        then
+            a=$(echo -e "Start" | dmenu -p "I2P is not running. What to do? >")
+            [ -z $a ] && exit;
+            [ $a == "Start" ] && ( out=$(i2prouter start))
+        else
+            a=$(echo -e "Stop" | dmenu -p "I2P is running. What to do? >")
+            [ -z $a ] && exit || (i2prouter start)
+        fi
+        ;;
 esac
 
 [ ! -z "$a" ] && [ ! -z "$out" ] && dunstify "$a" "$out"
-
-

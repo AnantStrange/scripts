@@ -1,5 +1,12 @@
 #!/bin/sh
 
+case $BLOCK_BUTTON in
+    1) notify-send "hi" ;;
+    3) notify-send "Dmenu-Wifi Module" "Right click for selecting Wifis\nMiddle Click for this help msg\nShift click for editing source";;
+    6) "$TERMINAL" -e "$EDITOR" "$0" ;;
+esac
+
+
 ssid=$(echo $(nmcli device wifi list --rescan yes)  | rg -o  ":..\s(.*?)\bIn" | awk '{ $1=$NF="";print}' | sort -u |dmenu -p "SSID :")
 
 if [ ! -z "$ssid" ];
