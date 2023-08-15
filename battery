@@ -47,7 +47,8 @@ then
     status=$(cat /sys/class/power_supply/BAT0/status)
     if [ "$status" == "Discharging" ];
     then
-        i3lock-fancy && systemctl hibernate
+        i3lock-fancy
+        systemctl hybrid-sleep
     fi
   elif [ "$capacity" -lt 25 ];
 	then

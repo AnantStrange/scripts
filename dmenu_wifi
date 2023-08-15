@@ -1,11 +1,17 @@
-ssid=$(echo $(nmcli device wifi list)  | rg -o  ":..\s(.*?)\bIn" | awk '{ $1=$NF="";print}' | sort -u |dmenu -p "SSID :")
+#!/bin/sh
+
+ssid=$(echo $(nmcli device wifi list --rescan yes)  | rg -o  ":..\s(.*?)\bIn" | awk '{ $1=$NF="";print}' | sort -u |dmenu -p "SSID :")
 
 if [ ! -z "$ssid" ];
 then
     out=$(nmcli device wifi connect $ssid)
     notify-send "WIFI Connect" "$out";
+    pkill -RTMIN+11 dwmblocks;
+fi
+
+:'
 else
     notify-send "WIFI Connect" "No SSIDs Available"
 fi
-
+'
 

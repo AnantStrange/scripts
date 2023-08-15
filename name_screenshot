@@ -1,0 +1,4 @@
+#!/bin/sh
+
+name=$(echo "" | dmenu -p "Name :");
+[ ! -z $name ] && maim -sf jpg -m 10  | tee '/home/anant/Pictures/'$name.jpg | xclip -selection clipboard -t image/png; 
