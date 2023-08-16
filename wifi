@@ -11,7 +11,8 @@ fi
 tmp=$(cat /sys/class/net/wlp3s0/operstate)
 if [ $tmp == 'up' ];
 then
-        b=$(iwgetid -r | cut -c1-8)
+        #b=$(iwgetid -r | cut -c1-8)
+        b=$(iwgetid -r)
 fi
 
 #echo "a :"$a

@@ -39,23 +39,22 @@ status=$(cat /sys/class/power_supply/BAT0/status)
 
 if [ "$status" == "Discharging" ];
 then
-    if [ "$capacity" -lt 10 ];
+    if [ "$capacity" -lt 15 ];
     then
-        seq 60 | while read number
-        do
-            notify-send  -h int:value:$number -h string:synchronous:progress "Battery Low" "Hybrid-Sleeping in"
-            sleep 1
-        done
-        dunctl close
+#        seq 60 | while read number
+#        do
+#            notify-send -u critical -h int:value:$number -h string:synchronous:progress "Battery Low" "Hybrid-Sleeping in"
+#            sleep 1
+#        done
+#        dunctl close
+        sleep 60;
         status=$(cat /sys/class/power_supply/BAT0/status)
-        if [ "$status" == "Discharging" ];
-        then
-            i3lock-fancy & systemctl hybrid-sleep
-        fi
+        #[ "$status" == "Discharging" ] && notify-send "sleeping"
+        [ "$status" == "Discharging" ] && i3lock-fancy & systemctl hybrid-sleep
 
     elif [ "$capacity" -lt 25 ];
     then
-        notify-send -u critical "Warning Battery low" "Plug in charger !!"
+        notify-send -u critical -t 5000 "Warning Battery low" "Plug in charger !!"
     fi 
 
 elif ([ "$status" == "Charging" ] || [ "$status" == "Full" ]) && [ "$capacity" -gt 97 ];

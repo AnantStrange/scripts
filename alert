@@ -1,4 +1,6 @@
 #!/bin/sh
 
-mpv --volume=70 ~/scripts/hey_listen.ogg > /dev/null
+[ "$2" == "Battery Low" ] && exit 0
+
+mpv --volume=65 ~/scripts/hey_listen.ogg > /dev/null
 

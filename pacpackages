@@ -17,16 +17,20 @@
 # When = PostTransaction
 # Exec = /usr/bin/pkill -RTMIN+8 dwmblocks # Or i3blocks if using i3./]/
 
+#echo "0" > /tmp/pacpackages_ignore;
 case $BLOCK_BUTTON in
 	3) notify-send "🎁 Upgrade module" "📦: number of upgradable packages
 - Left click to upgrade packages
 - Middle click to show upgradable packages" ;;
+    2) echo "1" > /tmp/pacpackages_ignore; notify-send "Pacpackages" "Updates ignored";;
 	6) "$TERMINAL" -e "$EDITOR" "$0" ;;
 esac
 
-update_main=$(pacman -Qu | wc -l)
+[ -f "/tmp/pacpackages_ignore" ] && [ $(cat /tmp/pacpackages_ignore) -eq 1 ] && exit;
+
+update_main=$(pacman -Qu  | wc -l)
 update_aur=$(paru -Qau | wc -l)
-if [ $update_main -gt 12 ] || [ $update_aur -gt 10 ] ;
+if [ $update_main -gt 30 ] || [ $update_aur -gt 10 ] ;
 then
         echo "📦$update_main & 🎁$update_aur";
 else
