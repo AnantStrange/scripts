@@ -7,18 +7,12 @@ case $BLOCK_BUTTON in
 esac
 
 
-ssid=$(echo $(nmcli device wifi list --rescan yes)  | rg -o  ":..\s(.*?)\bIn" | awk '{ $1=$NF="";print}' | sort -u |dmenu -p "SSID :")
+ssid=$( nmcli device wifi list --rescan yes | rg -o  ":..\s(.*?)\bIn" | awk '{ $1=$NF="";print}' | sort -u |dmenu -p "SSID :")
 
-if [ ! -z "$ssid" ];
+if [ -n "$ssid" ];
 then
-    out=$(nmcli device wifi connect $ssid)
+    out=$(nmcli device wifi connect "$ssid")
     notify-send "WIFI Connect" "$out";
     pkill -RTMIN+11 dwmblocks;
 fi
-
-:'
-else
-    notify-send "WIFI Connect" "No SSIDs Available"
-fi
-'
 

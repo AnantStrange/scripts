@@ -2,5 +2,5 @@
 
 
 a=$(uptime | awk -F ": " '{print $2}')
-echo ::$a
+echo ::"$a"
 

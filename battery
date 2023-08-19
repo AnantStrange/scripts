@@ -37,7 +37,7 @@ done && printf "\\n"
 
 status=$(cat /sys/class/power_supply/BAT0/status)
 
-if [ "$status" == "Discharging" ];
+if [ "$status" = "Discharging" ];
 then
     if [ "$capacity" -lt 15 ];
     then
@@ -49,15 +49,15 @@ then
 #        dunctl close
         sleep 60;
         status=$(cat /sys/class/power_supply/BAT0/status)
-        #[ "$status" == "Discharging" ] && notify-send "sleeping"
-        [ "$status" == "Discharging" ] && i3lock-fancy & systemctl hybrid-sleep
+        #[ "$status" = "Discharging" ] && notify-send "sleeping"
+        [ "$status" = "Discharging" ] && i3lock-fancy & systemctl hybrid-sleep
 
     elif [ "$capacity" -lt 25 ];
     then
         notify-send -u critical -t 5000 "Warning Battery low" "Plug in charger !!"
     fi 
 
-elif ([ "$status" == "Charging" ] || [ "$status" == "Full" ]) && [ "$capacity" -gt 97 ];
+elif { [ "$status" = "Charging" ] || [ "$status" = "Full" ]; } && [ "$capacity" -gt 97 ];
 then
     notify-send "Charging full" "Remove charger."
 fi 
