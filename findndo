@@ -1,11 +1,68 @@
-#!/bin/sh
+#!/bin/bash
 
-a=$(echo "" | dmenu -p "String >")
-if [ ! -z "$a" ];
-then
-    file=$(locate $a | dmenu -l 10 -p "File :")
-    mpv "$file"
-fi
+dirs=("$HOME/Downloads" "$HOME/Downloads/enter/courses" "$HOME/Downloads/media")
+
+echo "${dirs[@]}"
+
+for dir in "${dirs[@]}";do
+    content+="$(tree -f "$dir" -L 1 -a -i -n)"
+done
+
+content+="$(tree -f "/home/anant/Downloads" -L 1 -ain)"
+
+file=$(echo "$content" | dmenu -l 20 -p "File :")
+file_type=$(file -b "$file")
+
+#if [[ "$file_type" =~ "PDF" ]];then
+#    lnch zathura "$file";
+#elif [[ "$file_type" =~ "MP4" || "$file_type" =~ "video" || "$file_type" =~ "Matroska" ]];then
+#    lnch mpv "$file"
+#elif [[ "$file_type" =~ "directory" ]];then
+#    choice=$(printf "Play with mpv\nCopy Path\nOpen with nvim" | dmenu -p "Choose >");
+#    case "$choice" in
+#        "Play with mpv")
+#            lnch mpv "$file";
+#            ;;
+#        "Copy Path")
+#            xclip "$file";
+#            ;;
+#        "Open with nvim")
+#            st -e nvim "$file";
+#            ;;
+#        *)
+#            exit;
+#            ;;
+#    esac
+#
+#fi
+#
+
+case "$file_type" in 
+    "PDF")
+        lnch zathura "$file";
+        ;;
+    "*MP4*" | "*video*" | "*matroska*")
+        lnch mpv "$file";
+        ;;
+    "directory")
+        choice=$(printf "Play with mpv\nCopy Path\nOpen with nvim" | dmenu -p "Choose >");
+        case "$choice" in
+            "Play with mpv")
+                lnch mpv "$file";
+                ;;
+            "Copy Path")
+                xclip "$file";
+                ;;
+            "Open with nvim")
+                st -e nvim "$file";
+                ;;
+            *)
+                exit;
+                ;;
+        esac
+
+esac
+
 
 
 

@@ -3,6 +3,12 @@
 # to charge status (🔌 for plugged up, 🔋 for discharging on battery, etc.).
 
 case $BLOCK_BUTTON in
+#    1)notify-send "1";;
+#    2)notify-send "2";;
+#    3)notify-send "3";;
+#    4)notify-send "4";;
+#    5)notify-send "5";;
+#    6)notify-send "6";;
     3) notify-send "🔋 Battery module" "🔋: discharging
         🛑: not charging
         ♻: stagnant charge

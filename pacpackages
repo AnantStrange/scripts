@@ -26,11 +26,12 @@ case $BLOCK_BUTTON in
 	6) "$TERMINAL" -e "$EDITOR" "$0" ;;
 esac
 
-[ -f "/tmp/pacpackages_ignore" ] && [ $(cat /tmp/pacpackages_ignore) -eq 1 ] && exit;
+[ -f "/tmp/pacpackages_ignore" ] && [ "$(cat /tmp/pacpackages_ignore)" -eq 1 ] && exit;
 
+sudo pacman -Sy > /dev/null 2>&1;
 update_main=$(pacman -Qu  | wc -l)
 update_aur=$(paru -Qau | wc -l)
-if [ $update_main -gt 30 ] || [ $update_aur -gt 10 ] ;
+if [ "$update_main" -gt 30 ] || [ "$update_aur" -gt 10 ] ;
 then
         echo "📦$update_main & 🎁$update_aur";
 else
