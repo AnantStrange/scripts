@@ -1,51 +1,28 @@
 #!/bin/bash
-
-dirs=("$HOME/Downloads" "$HOME/Downloads/enter/courses" "$HOME/Downloads/media")
-
-echo "${dirs[@]}"
+set -x
+dirs=("$HOME/Downloads" "$HOME/Downloads/enter/courses" "$HOME/Downloads/media"
+    "$HOME/scripts" "$HOME/.config" "$HOME/wm" "$HOME/wm/dwm" "$HOME/wm/st" "$HOME/.local/share")
 
 for dir in "${dirs[@]}";do
-    content+="$(tree -f "$dir" -L 1 -a -i -n)"
+    content+="$(tree -f "$dir" -L 1 -a -i -n)";
 done
 
-content+="$(tree -f "/home/anant/Downloads" -L 1 -ain)"
-
-file=$(echo "$content" | dmenu -l 20 -p "File :")
+file=$(echo "$content" | dmenu -l 20  -p "File :")
+[ -z "$file" ] && exit 0;
 file_type=$(file -b "$file")
 
-#if [[ "$file_type" =~ "PDF" ]];then
-#    lnch zathura "$file";
-#elif [[ "$file_type" =~ "MP4" || "$file_type" =~ "video" || "$file_type" =~ "Matroska" ]];then
-#    lnch mpv "$file"
-#elif [[ "$file_type" =~ "directory" ]];then
-#    choice=$(printf "Play with mpv\nCopy Path\nOpen with nvim" | dmenu -p "Choose >");
-#    case "$choice" in
-#        "Play with mpv")
-#            lnch mpv "$file";
-#            ;;
-#        "Copy Path")
-#            xclip "$file";
-#            ;;
-#        "Open with nvim")
-#            st -e nvim "$file";
-#            ;;
-#        *)
-#            exit;
-#            ;;
-#    esac
-#
-#fi
-#
-
 case "$file_type" in 
-    "PDF")
+    *"PDF"*)
         lnch zathura "$file";
         ;;
-    "*MP4*" | "*video*" | "*matroska*")
+    *"MP4"* | *"video"* | *"matroska"*)
         lnch mpv "$file";
         ;;
-    "directory")
-        choice=$(printf "Play with mpv\nCopy Path\nOpen with nvim" | dmenu -p "Choose >");
+    *"shell"*)
+        lnch st -e nvim "$file";
+        ;;
+    *"directory"*)
+        choice=$(printf "Play with mpv\nCopy Path\nOpen with nvim\nOpen terminal here" | dmenu -p "Choose >");
         case "$choice" in
             "Play with mpv")
                 lnch mpv "$file";
@@ -56,11 +33,17 @@ case "$file_type" in
             "Open with nvim")
                 st -e nvim "$file";
                 ;;
-            *)
-                exit;
+            "Open terminal here")
+                lnch st -e cd "$file";
                 ;;
-        esac
-
+            *)
+                exit 0;
+                ;;
+        esac;;
+    *)
+        echo cached;
+        lnch xdg-open "$file"
+        ;;
 esac
 
 

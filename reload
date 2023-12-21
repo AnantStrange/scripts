@@ -1,12 +1,9 @@
-#! /bin/sh
+#! /bin/zsh
 
-shopt -s nocasematch
-[ -n "$1" ] && a=$1 || a=$(printf "Dwmblocks\nSXHKD\nDWM\nDunst\nTransmission\nI2P Router" | dmenu -p "Reload >")
+[ -n "$1" ] && a=$1 || a=$(printf "Dwmblocks\nSXHKD\nDWM\nDunst\nTransmission\nI2P Router\nPicom" | dmenu -p "Reload >")
 
-#set -xv
-
-case "$a" in 
-    "Dwmblocks")
+case "${a:l}" in 
+    "dwmblocks")
         if [ -n "$(pidof dwmblocks)" ]
         then
             a=$(printf "Restart\nKill" | dmenu -p "Dwmblocks is already running. What to do? >");
@@ -19,7 +16,7 @@ case "$a" in
         fi
         ;;
 
-    "Dunst")
+    "dunst")
         if [ -n "$(pidof dunst)" ]
         then
             a=$(printf "Restart\nKill" | dmenu -p "Dunst is already running. What to do? >")
@@ -31,23 +28,36 @@ case "$a" in
         fi
         ;;
 
-    "DWM")
+    "dwm")
         pkill -HUP dwm >> /tmp/dwm_log
         ;;
 
-    "SXHKD")
+    "picom")
+        if [ -n "$(pidof picom)" ]
+        then
+            a=$(printf "Restart\nKill" | dmenu -p "Picom is already running. What to do? >")
+            [ -z "$a" ] && exit;
+            [ "$a" = "Restart" ] && (killall picom;lnch picom;return 0) || (killall picom)
+        else
+            a=$(printf "Start"| dmenu -p "Picom is not running. What to do? >")
+            [ -z "$a" ] && exit || (lnch picom)
+        fi
+        ;;
+        
+
+    "sxhkd")
         if [ -n "$(pidof sxhkd)" ]
         then
-            a=$(printf "Restart\nKill" | dmenu -p "Dunst is already running. What to do? >")
+            a=$(printf "Restart\nKill" | dmenu -p "SXHKD is already running. What to do? >")
             [ -z "$a" ] && exit;
-            [ "$a" = "Restart" ] && (killall -SIGUSR1 sxhkd;return 0) || (killall dunst)
+            [ "$a" = "Restart" ] && (killall -SIGUSR1 sxhkd;return 0) || (killall sxhkd)
         else
-            a=$(printf "Start"| dmenu -p "Dunst is not running. What to do? >")
+            a=$(printf "Start"| dmenu -p "SXHKD is not running. What to do? >")
             [ -z "$a" ] && exit || (sxhkd &)
         fi
         ;;
 
-    "Transmission")
+    "transmission")
         if [ -n "$(pidof transmission-daemon)" ]
         then
             a=$(printf "Restart\nStop")
@@ -59,7 +69,7 @@ case "$a" in
         fi
         ;;
 
-    "I2P Router")
+    "i2p router")
         if i2prouter status | grep -q 'not running' 
         then
             a=$(printf "Start" | dmenu -p "I2P is not running. What to do? >")
