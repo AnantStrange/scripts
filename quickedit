@@ -1,0 +1,26 @@
+#!/bin/sh
+
+# The path to the temporary file
+tmp_file="/tmp/git_tree_output.txt"
+
+# Check if the file exists and is not older than 1 hour
+if [ -f /tmp/git_tree_output.txt ] && [ "$(find /tmp/git_tree_output.txt -mmin -60)" ]; then
+    # Use the cached file if it exists and is not older than 1 hour
+    echo "Using cached file"
+else
+    # Run the command and store the output in the temporary file
+    mapfile -t output_array < <(locate -r "\.git$" | grep -v "nvim\|paru\|anaconda\|oh-my-zsh\|Trash\|plugins\|Code\|icons\|extensions\|repositories\|cargo")
+    all_ls_output=""
+    for element in "${output_array[@]}"; do
+        element_without_git=$(echo "$element" | sed 's/\.git$//')
+        all_ls_output+="$(tree -ifa "$element_without_git")"$'\n'
+    done
+    echo "$all_ls_output" > "$tmp_file"
+    echo "Updated cached file"
+fi
+
+# Read from the temporary file and use fzf with --preview option to launch nvim after selection
+fzf --preview="bat -f {}" --bind="enter:execute(nvim {})" --expect=ctrl-c < "$tmp_file"
+
+
+
