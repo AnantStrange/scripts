@@ -1,0 +1,5 @@
+#!/bin/bash
+
+music=$(mpc listall | dmenu -f -l 10 -p "Music >")
+[ -z "$music" ] && exit;
+mpc insert "$music" && mpc next;
