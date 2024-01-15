@@ -22,19 +22,22 @@ case "$file_type" in
         lnch st -e nvim "$file";
         ;;
     *"directory"*)
-        choice=$(printf "Play with mpv\nCopy Path\nOpen with nvim\nOpen terminal here" | dmenu -p "Choose >");
+        choice=$(printf "mpv\nCopy Path\nnvim\nterminal\nthunar" | dmenu -p "Choose >");
         case "$choice" in
-            "Play with mpv")
+            "mpv")
                 lnch mpv "$file";
                 ;;
             "Copy Path")
                 xclip "$file";
                 ;;
-            "Open with nvim")
+            "nvim")
                 st -e nvim "$file";
                 ;;
-            "Open terminal here")
+            "terminal")
                 lnch st -e cd "$file";
+                ;;
+            "thunar")
+                lnch thunar "$file";
                 ;;
             *)
                 exit 0;

@@ -4,7 +4,7 @@
 tmp_file="/tmp/git_tree_output.txt"
 
 # Check if the file exists and is not older than 1 hour
-if [ -f /tmp/git_tree_output.txt ] && [ "$(find /tmp/git_tree_output.txt -mmin -120)" ]; then
+if [ -f /tmp/git_tree_output.txt ] && [ "$(find /tmp/git_tree_output.txt -mmin -360)" ]; then
     # Use the cached file if it exists and is not older than 1 hour
     echo "Using cached file"
 else

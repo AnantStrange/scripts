@@ -2,4 +2,10 @@
 
 music=$(mpc listall | dmenu -f -l 10 -p "Music >")
 [ -z "$music" ] && exit;
-mpc insert "$music" && mpc next;
+mpc insert "$music";
+
+[ -z $(mpc status |grep playing) ] && mpc play;
+mpc next
+
+
+
