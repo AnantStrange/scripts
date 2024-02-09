@@ -1,0 +1,12 @@
+#!/bin/bash
+
+# Path to the tgpt script
+TGPT_SCRIPT="tgpt"
+
+# Read input from stdin
+echo "Enter your input. Press Ctrl+D on an empty line to stop."
+INPUT=$(cat)
+
+# Run the tgpt script with the input as a prompt
+"$TGPT_SCRIPT" "$INPUT"
+

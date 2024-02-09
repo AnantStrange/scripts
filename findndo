@@ -1,6 +1,6 @@
 #!/bin/bash
 set -x
-dirs=("$HOME/Downloads" "$HOME/Downloads/enter/courses" "$HOME/Downloads/media"
+dirs=("$HOME/Documents" "$HOME/Downloads" "$HOME/Downloads/enter/courses" "$HOME/Downloads/media"
     "$HOME/scripts" "$HOME/.config" "$HOME/wm" "$HOME/wm/dwm" "$HOME/wm/st" "$HOME/.local/share")
 
 for dir in "${dirs[@]}";do
