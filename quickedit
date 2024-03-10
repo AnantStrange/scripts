@@ -1,11 +1,12 @@
 #!/bin/sh
 
 # The path to the temporary file
-tmp_file="/tmp/git_tree_output.txt"
+# tmp_file="/tmp/git_tree_output.txt"
+tmp_file="$HOME/.local/share/git_tree_output.txt"
 
-# Check if the file exists and is not older than 1 hour
-if [ -f /tmp/git_tree_output.txt ] && [ "$(find /tmp/git_tree_output.txt -mmin -360)" ]; then
-    # Use the cached file if it exists and is not older than 1 hour
+# Check if the file exists and is older than 5 days
+if [ -f /tmp/git_tree_output.txt ] && find $tmp_file -mtime -5 >/dev/null 2>&1; then
+    # Use the cached file if it exists and is not older than 5 days
     echo "Using cached file"
 else
     # Run the command and store the output in the temporary file

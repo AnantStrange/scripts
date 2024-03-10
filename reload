@@ -80,6 +80,18 @@ case "${a:l}" in
             [ -z "$a" ] && exit || out=$(i2prouter stop)
         fi
         ;;
+
+    "JamesDSP")
+        if [ -n "$(pidof jamesdsp)" ]
+        then
+            a=$(printf "Restart\nStop")
+            [ -z "$a" ] && exit;
+            [ "$a" = "Restart" ] && killall jamesdsp && jamesdsp -t || jamesdsp -t
+        else
+            a=$(printf "Start"| dmenu -p "JamesDSP Daemon not running. What to do? >")
+            [ -z "$a" ] && exit || jamesdsp -t;
+        fi
+        ;;
 esac
 
 [ -n "$a" ] && [ -n  "$out" ] && dunstify "$a" "$out"

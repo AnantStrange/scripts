@@ -1,0 +1,33 @@
+#!/bin/sh
+
+# File path
+config_file="$HOME/.local/hibernate"
+
+# Check if the configuration file exists
+if [ ! -f "$config_file" ]; then
+    # If the file does not exist, create it with default value hibernate_enabled=true
+    echo "hibernate_enabled=true" > "$config_file"
+fi
+
+# Read the hibernation state from the configuration file
+hibernate_enabled=$(cat "$config_file")
+
+# Parse the value to get the actual hibernation state
+hibernate_state=$(echo "$hibernate_enabled" | cut -d "=" -f 2)
+
+# Prompt the user with dmenu to toggle hibernation state
+new_state=$(echo -e "Toggle hibernation\nKeep same" | dmenu -p "Hibernation is currently $hibernate_state" -i)
+
+# Toggle the hibernation state if user selects "Toggle hibernation"
+if [ "$new_state" = "Toggle hibernation" ]; then
+    # Invert the hibernation state
+    if [ "$hibernate_state" = "true" ]; then
+        hibernate_enabled="hibernate_enabled=false"
+    else
+        hibernate_enabled="hibernate_enabled=true"
+    fi
+
+    # Update the configuration file with the new state
+    echo "$hibernate_enabled" > "$config_file"
+fi
+
