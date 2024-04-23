@@ -56,8 +56,8 @@ then
         dunctl close
         status=$(cat /sys/class/power_supply/BAT0/status)
 
-        if [ -f /path/to/hibernate.conf ]; then
-            source /path/to/hibernate.conf
+        if [ -f $HOME/.local/hibernate ]; then
+            source $HOME/.local/hibernate
         else
             hibernate_enabled=true
         fi
