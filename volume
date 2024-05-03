@@ -14,9 +14,24 @@ case $BLOCK_BUTTON in
 	6) "$TERMINAL" -e "$EDITOR" "$0" ;;
 esac
 
-[ $(pamixer --get-mute) = true ] && echo 🔇 && exit
+# [ $(pamixer --get-mute) = true ] && echo 🔇 && exit
+volume=$(wpctl get-volume @DEFAULT_AUDIO_SINK@ | grep -oP 'Volume: \K.*')
+if [ "$volume" = "0.00" ]; then
+    echo "🔇";
+    exit;
+fi
 
-vol="$(pamixer --get-volume)"
+if ! command -v bc &> /dev/null; then
+    echo -e "\e[1;31mbc is not installed.\e[0m To install on:"
+    echo -e "  - \e[1;34mDebian/Ubuntu (apt):\e[0m sudo apt install bc"
+    echo -e "  - \e[1;34mArch Linux (pacman):\e[0m sudo pacman -S bc"
+    echo -e "  - \e[1;34mGentoo (emerge):\e[0m sudo emerge -av sys-apps/bc"
+    exit 1
+fi
+
+# vol="$(wpctl get-volume @DEFAULT_AUDIO_SINK@ )"
+vol=$(wpctl get-volume @DEFAULT_AUDIO_SINK@ | grep -oP 'Volume: \K[0-9.]+')
+vol=$(printf "%.0f" $(echo "$vol * 100" | bc))
 
 if [ "$vol" -gt "70" ]; then
 	icon="🔊"
