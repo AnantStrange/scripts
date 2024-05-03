@@ -9,4 +9,16 @@ case $BLOCK_BUTTON in
 	6) "$TERMINAL" -e "$EDITOR" "$0" ;;
 esac
 
+
+if ! command -v sensors &> /dev/null; then
+    echo -e "\e[1;31msensors is not installed.\e[0m To install on:"
+    echo -e "  - \e[1;34mArch Linux (pacman):\e[0m sudo pacman -S sensores"
+
+    notify-send -u critical -a "cpu/script" -t 4000 "Error: sensors is not installed" "Please install appropriate utility"
+
+    exit 1
+fi
+
+
+
 sensors | awk '/Core 0/ {print "🌡" $3}'

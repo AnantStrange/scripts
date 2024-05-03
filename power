@@ -1,7 +1,7 @@
 #!/bin/sh
 
 var=$(echo -e "Power-off\nReboot\nSuspend\nHibernate\nHybrid-sleep\nkill-dwm" | dmenu)
-#echo $var
+
 if [ "$var" == "Power-off" ]; then
     pkexec shutdown now
 elif [ "$var" == "Reboot" ]; then
@@ -9,10 +9,10 @@ elif [ "$var" == "Reboot" ]; then
 elif [ "$var" == "kill-dwm" ]; then
     killall dwmblocks & killall dunst & killall dwm
 elif [ "$var" == "Suspend" ]; then
-    i3lock-fancy & pkexec systemctl suspend
+    sudo -A systemctl suspend && i3lock
 elif [ "$var" == "Hibernate" ]; then
-    i3lock-fancy & pkexec systemctl hibernate
+    sudo -A systemctl hibernate && i3lock
 elif [ "$var" == "Hybrid-sleep" ]; then
-    i3lock-fancy & pkexec systemctl hybrid-sleep
+    sudo -A systemctl hybrid-sleep && i3lock
 fi
 
