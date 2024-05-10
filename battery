@@ -37,7 +37,7 @@ done && printf "\\n"
 
 status=$(cat /sys/class/power_supply/BAT0/status)
 
-if [ "$status" = "Discharging" || "$status" = "Not charging" || "$status" = "Unknown" ];
+if [[ "$status" = "Discharging" || "$status" = "Not charging" || "$status" = "Unknown" ]];
 then
     if [ "$capacity" -lt 16 ];
     then
@@ -50,8 +50,8 @@ then
         dunctl close
         status=$(cat /sys/class/power_supply/BAT0/status)
 
-        if [ -f $HOME/.local/hibernate ]; then
-            source $HOME/.local/hibernate
+        if [ -f /tmp/hibernate ]; then
+            source /tmp/hibernate
         else
             hibernate_enabled=true
         fi

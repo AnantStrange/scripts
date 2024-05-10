@@ -21,8 +21,7 @@ urls=(
     "https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm"
 )
 
-
-mkdir -p ~/wm ~/Downloads ~/work ~/rough ~/.local ~/.local/share ~/local/share/zsh
+mkdir -p ~/wm ~/Downloads ~/work ~/.local ~/.local/share ~/local/share/zsh ~/.config
 
 echo -e "\e[34m\n############################### Cloning repositories into wm directory ###############################\e[0m\n"
 for url in "${wm_urls[@]}"; do
@@ -63,8 +62,8 @@ if cd "$HOME/.dotfiles"; then
         # Get the directory name without './'
         dir_name=$(basename "$dir")
         
-        read -p "Do you want to stow $dir_name directory? (yes/no): " choice
-        if [[ $choice == "yes" ]]; then
+        read -p "Do you want to stow $dir_name directory? (yes/no)[yes]: " choice
+        if [ -z "$choice" ] || [[ $choice == "yes" ]] ; then
             echo -e "\e[33mStowing $dir_name directory...\e[0m"
             stow "$dir_name"
         else

@@ -9,10 +9,10 @@ elif [ "$var" == "Reboot" ]; then
 elif [ "$var" == "kill-dwm" ]; then
     killall dwmblocks & killall dunst & killall dwm
 elif [ "$var" == "Suspend" ]; then
-    sudo -A systemctl suspend && i3lock
+    pkexec systemctl suspend && i3lock
 elif [ "$var" == "Hibernate" ]; then
-    sudo -A systemctl hibernate && i3lock
+    pkexec systemctl hibernate && i3lock
 elif [ "$var" == "Hybrid-sleep" ]; then
-    sudo -A systemctl hybrid-sleep && i3lock
+    pkexec systemctl hybrid-sleep && i3lock
 fi
 
