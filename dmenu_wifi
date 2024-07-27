@@ -11,8 +11,13 @@ ssid=$( nmcli device wifi list --rescan yes | rg -o  ":..\s(.*?)\bIn" | awk '{ $
 
 if [ -n "$ssid" ];
 then
-    out=$(nmcli device wifi connect $ssid)
-    notify-send "WIFI Connect" "$out";
+    out=$(nmcli device wifi connect "$ssid")
+    # Notify user of the connection status
+    if [[ $? -eq 0 ]]; then
+        notify-send "WIFI Connect" "Connected to $ssid"
+    else
+        notify-send "WIFI Connect" "Failed to connect to $ssid: $out"
+    fi
     pkill -RTMIN+11 dwmblocks;
 fi
 

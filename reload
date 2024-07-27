@@ -1,6 +1,6 @@
 #! /bin/zsh
 
-[ -n "$1" ] && a=$1 || a=$(printf "Dwmblocks\nSXHKD\nDWM\nDunst\nTransmission\nI2P Router\nPicom" | dmenu -p "Reload >")
+[ -n "$1" ] && a=$1 || a=$(printf "Dwmblocks\nSXHKD\nDWM\nDunst\nTransmission\nI2P Router\nPicom\nJamesDSP" | dmenu -p "Reload >")
 
 case "${a:l}" in 
     "dwmblocks")
@@ -81,7 +81,7 @@ case "${a:l}" in
         fi
         ;;
 
-    "JamesDSP")
+    "jamesdsp")
         if [ -n "$(pidof jamesdsp)" ]
         then
             a=$(printf "Restart\nStop")

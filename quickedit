@@ -1,10 +1,10 @@
 #!/bin/sh
 
-tmp_file="$HOME/.local/share/git_tree_output.txt"
+tmp_file="$HOME/.local/share/quickedit.txt"
 ignore="nvim|paru|anaconda|oh-my-zsh|Trash|plugins|Code|icons|extensions|repositories|cargo|site-packages|node_modules"
 
 if find $tmp_file -mtime -5 >/dev/null 2>&1; then
-    echo "Using cached file"
+    echo "Using cached file $tmp_file"
 else
     mapfile -t output_array < <(locate -r "\.git$" | grep -Evw "$ignore")
     all_ls_output=""
