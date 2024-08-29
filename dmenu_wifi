@@ -1,23 +1,107 @@
 #!/bin/sh
 
-case $BLOCK_BUTTON in
-    1) notify-send "hi" ;;
-    3) notify-send "Dmenu-Wifi Module" "Right click for selecting Wifis\nMiddle Click for this help msg\nShift click for editing source";;
-    6) "$TERMINAL" -e "$EDITOR" "$0" ;;
-esac
+# Function to scan networks and output SSID and Security
+scan_networks() {
+    printf "rescan\n"
+    sudo iwlist wlp3s0 scan | awk -F: '
+        /Cell/ { cell = $0 }
+        /ESSID/ { ssid = $2 }
+        /IE: WPA/ { security = "WPA" }
+        /IE: IEEE 802.11i/ { security = "WPA2" }
+        /IE: WPA3/ { security = "WPA3" }
+        /Encryption key:on/ && !/IE: WPA/ && !/IE: IEEE 802.11i/ { security = "WEP" }
+        /Encryption key:off/ { security = "Open" }
+        /Quality/ {
+            if (ssid && security) {
+                gsub(/"/, "", ssid)
+                print ssid " Security: " security
+                ssid = ""; security = ""
+            }
+        }
+    '
+}
 
+# Function to handle SSID selection
+select_ssid() {
+    while true; do
+        choice=$(scan_networks | dmenu -p "Select SSID :")
 
-ssid=$( nmcli device wifi list --rescan yes | rg -o  ":..\s(.*?)\bIn" | awk '{ $1=$NF="";print}' | sort -u |dmenu -p "SSID :")
+        # Check if user chose to rescan
+        if [ "$choice" = "rescan" ]; then
+            return 1  # Indicate that rescan is requested
+        fi
 
-if [ -n "$ssid" ];
-then
-    out=$(nmcli device wifi connect "$ssid")
-    # Notify user of the connection status
-    if [[ $? -eq 0 ]]; then
-        notify-send "WIFI Connect" "Connected to $ssid"
+        # Exit if no SSID selected
+        if [ -z "$choice" ]; then
+            notify-send "Wi-Fi Connection" "No SSID selected or script exited."
+            exit 1
+        fi
+
+        # Extract SSID and security type
+        ssid=$(echo "$choice" | awk -F " Security: " '{print $1}')
+        security=$(echo "$choice" | awk -F " Security: " '{print $2}')
+        return 0  # Indicate successful SSID selection
+    done
+}
+
+# Function to handle password prompt
+prompt_password() {
+    while true; do
+        if [ "$security" != "Open" ]; then
+            password=$(printf "rescan\nquit" | dmenu -p "Password for $ssid :")
+
+            if [ "$password" = "quit" ]; then
+                echo "Exiting..."
+                exit 0
+            elif [ "$password" = "rescan" ]; then
+                return 1  # Indicate that rescan is requested
+            elif [ -n "$password" ]; then
+                break  # Exit the password prompt loop with a valid password
+            fi
+        else
+            break  # Exit the password prompt loop if the network is open
+        fi
+    done
+    return 0  # Indicate that password was provided
+}
+
+# Function to connect to the network
+connect_network() {
+    if [ "$security" = "Open" ]; then
+        output=$(nmcli device wifi connect "$ssid" 2>&1)
     else
-        notify-send "WIFI Connect" "Failed to connect to $ssid: $out"
+        if [ -z "$password" ]; then
+            notify-send "Wi-Fi Connection" "No password provided for $ssid"
+            return 1
+        fi
+        output=$(nmcli device wifi connect "$ssid" password "$password" 2>&1)
     fi
-    pkill -RTMIN+11 dwmblocks;
-fi
+
+    # Check connection status
+    if [ $? -eq 0 ]; then
+        notify-send "Wi-Fi Connection" "Successfully connected to $ssid."
+        return 0
+    else
+        notify-send "Wi-Fi Connection" "Failed to connect to $ssid. Output: $output"
+        return 1
+    fi
+}
+
+# Main script execution
+while true; do
+    # Select SSID and check if rescan is requested
+    if ! select_ssid; then
+        continue  # Restart the entire process if rescan is requested
+    fi
+
+    while true; do
+        # Prompt for password and check if rescan is requested
+        if ! prompt_password; then
+            break  # Exit the password prompt loop to restart the SSID selection process
+        fi
+
+        connect_network
+        exit 0
+    done
+done
 

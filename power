@@ -9,10 +9,10 @@ elif [ "$var" == "Reboot" ]; then
 elif [ "$var" == "kill-dwm" ]; then
     killall dwmblocks & killall dunst & killall dwm
 elif [ "$var" == "Suspend" ]; then
-    pkexec systemctl suspend && i3lock
+    pkexec systemctl suspend && i3lock-fancy
 elif [ "$var" == "Hibernate" ]; then
-    pkexec systemctl hibernate && i3lock
+    pkexec systemctl hibernate && i3lock-fancy
 elif [ "$var" == "Hybrid-sleep" ]; then
-    pkexec systemctl hybrid-sleep && i3lock
+    pkexec systemctl hybrid-sleep && i3lock-fancy
 fi
 

@@ -41,14 +41,6 @@ if [[ "$status" = "Discharging" || "$status" = "Not charging" || "$status" = "Un
 then
     if [ "$capacity" -lt 16 ];
     then
-        notify-send -u critical -t 5000 "Warning Battery low" "Plug in charger !!"
-        seq 60 | while read number
-        do
-            notify-send -u critical -h int:value:$number -h string:synchronous:progress "Battery Low" "Hybrid-Sleeping in"
-            sleep 1;
-        done
-        dunctl close
-        status=$(cat /sys/class/power_supply/BAT0/status)
 
         if [ -f /tmp/hibernate ]; then
             source /tmp/hibernate
@@ -56,9 +48,31 @@ then
             hibernate_enabled=true
         fi
 
-        if [ "$status" = "Discharging" ] && [ "$hibernate_enabled" = true ]; then
-            i3lock-fancy & systemctl hybrid-sleep
+        if [ "$hibernate_enabled" != true ]; then
+            exit 0;
         fi
+
+
+        notify-send -u critical -t 5000 "Warning Battery low" "Plug in charger !!"
+
+        seq 60 | while read number
+        do
+            status=$(cat /sys/class/power_supply/BAT0/status)
+            if [ "$status" = "Charging" ];
+            then
+                exit 0;
+            fi
+            progress=$(( number * 100 / 60 ))
+            notify-send -u critical -t 60000 -h int:value:$progress -h string:synchronous:progress "Battery Low" "Hybrid-Sleeping in $((60 - number)) seconds"
+            sleep 1;
+        done
+        dunstctl close
+
+
+        i3lock-fancy && systemctl hybrid-sleep;
+        # if [ "$status" = "Discharging" ] && [ "$hibernate_enabled" = true ]; then
+        #     i3lock-fancy & systemctl hybrid-sleep
+        # fi
 
     elif [ "$capacity" -lt 26 ];
     then

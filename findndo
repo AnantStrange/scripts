@@ -7,9 +7,30 @@ for dir in "${dirs[@]}";do
     content+="$(tree -f "$dir" -L 1 -a -i -n)";
 done
 
+
+# Check for --dragon or -d flag
+dragon=false
+while [ $# -gt 0 ]; do
+    case "$1" in
+        --dragon|-d)
+            dragon=true
+            shift
+            ;;
+        *)
+            break
+            ;;
+    esac
+done
+
 file=$(echo "$content" | dmenu -l 20  -p "File :")
 [ -z "$file" ] && exit 0;
 file_type=$(file -b "$file")
+
+# If --dragon or -d was passed, open with dragon-drop and exit
+if [ "$dragon" = true ]; then
+    lnch dragon-drop "$file"
+    exit 0
+fi
 
 case "$file_type" in 
     *"PDF"*)
