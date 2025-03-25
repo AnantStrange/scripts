@@ -1,28 +1,47 @@
 #!/bin/sh
 
-# Check if input arguments are provided
-if [ "$#" -ne 2 ]; then
-    echo "Usage: $0 input_directory output_directory"
+show_help() {
+    echo "Usage: $0 [input_directory] [output_directory]"
+    echo "Converts all supported documents in input_directory to PDF."
+    echo "If no output_directory is given, the current directory is used."
+    exit 0
+}
+
+# Show help if --help is passed
+if [ "$1" = "--help" ]; then
+    show_help
+fi
+
+# Check if LibreOffice is installed
+if ! command -v libreoffice >/dev/null 2>&1; then
+    echo "Error: libreoffice is not installed. Install it first."
     exit 1
 fi
 
-# Store input arguments in variables
-input_dir="$1"
-output_dir="$2"
+# Default directories
+input_dir="${1:-.}"  # If no input, use current directory
+output_dir="${2:-.}" # If no output, use current directory
 
-# Ensure output directory exists, create if not
+# Ensure output directory exists
 mkdir -p "$output_dir"
 
 # Loop through files in the input directory
 for file in "$input_dir"/*; do
-    # Check if file is a regular file
     if [ -f "$file" ]; then
-        # Get the filename without the directory path and extension
-        # filename=$(basename -- "$file")
-        # filename_noext="${filename%.*}"
-        
-        # Convert the file to PDF and save in the output directory
-        libreoffice --convert-to pdf "$file" --outdir "$output_dir"
+        filename=$(basename -- "$file")
+        echo "Converting: $filename"
+
+        # Convert file to PDF
+        libreoffice --headless --convert-to pdf "$file" --outdir "$output_dir"
+
+        # Check if conversion succeeded
+        if [ $? -eq 0 ]; then
+            echo "✔️ Success: $filename -> $output_dir"
+        else
+            echo "❌ Failed: $filename"
+        fi
     fi
 done
+
+echo "✅ Conversion completed!"
 

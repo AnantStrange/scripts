@@ -1,10 +1,15 @@
 #!/bin/bash
 set -x
-dirs=("$HOME/Documents" "$HOME/Downloads" "$HOME/Downloads/enter/courses" "$HOME/Downloads/media"
-    "$HOME/scripts" "$HOME/.config" "$HOME/wm" "$HOME/wm/dwm" "$HOME/wm/st" "$HOME/.local/share")
+dirs=(
+    "$HOME/Documents" "$HOME/Downloads" "$HOME/Downloads/enter/courses" "$HOME/Downloads/media"
+    "$HOME/scripts" "$HOME/.config" "$HOME/wm" "$HOME/wm/dwm" "$HOME/wm/st" "$HOME/.local/share"
+    "$HOME/study"
+    "$HOME/Pictures"
+    )
 
 for dir in "${dirs[@]}";do
-    content+="$(tree -f "$dir" -L 1 -a -i -n)";
+    # content+="$(tree -f "$dir" -L 1 -a -i -n)";
+    content+="$(tree -f "$dir" -L 1 -a -i -n)"$'\n'
 done
 
 
@@ -22,9 +27,14 @@ while [ $# -gt 0 ]; do
     esac
 done
 
-file=$(echo "$content" | dmenu -l 20  -p "File :")
+file=$(echo "$content" | dmenu -i -l 20  -p "File :")
 [ -z "$file" ] && exit 0;
-file_type=$(file -b "$file")
+
+# If --dragon is used and a directory is selected, list its contents instead
+if [ "$dragon" = true ] && [ -d "$file" ]; then
+    lnch dragon-drop "$file"/*
+    exit 0
+fi
 
 # If --dragon or -d was passed, open with dragon-drop and exit
 if [ "$dragon" = true ]; then
@@ -32,6 +42,7 @@ if [ "$dragon" = true ]; then
     exit 0
 fi
 
+file_type=$(file -b "$file")
 case "$file_type" in 
     *"PDF"*)
         lnch zathura "$file";
@@ -43,7 +54,7 @@ case "$file_type" in
         lnch st -e nvim "$file";
         ;;
     *"directory"*)
-        choice=$(printf "mpv\nCopy Path\nnvim\nterminal\nthunar" | dmenu -p "Choose >");
+        choice=$(printf "mpv\nCopy Path\nnvim\nterminal\nthunar" | dmenu -i -p "Choose >");
         case "$choice" in
             "mpv")
                 lnch mpv "$file";

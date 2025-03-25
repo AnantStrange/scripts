@@ -48,31 +48,37 @@ then
             hibernate_enabled=true
         fi
 
+        notify-send -u critical -t 5000 "Warning Battery low" "Plug in charger !!"
+
         if [ "$hibernate_enabled" != true ]; then
             exit 0;
         fi
 
-
-        notify-send -u critical -t 5000 "Warning Battery low" "Plug in charger !!"
-
-        seq 60 | while read number
-        do
+        for number in $(seq 60); do
             status=$(cat /sys/class/power_supply/BAT0/status)
-            if [ "$status" = "Charging" ];
-            then
-                exit 0;
+            if [ "$status" = "Charging" ]; then
+                dunstctl close
+                exit 0
             fi
             progress=$(( number * 100 / 60 ))
-            notify-send -u critical -t 60000 -h int:value:$progress -h string:synchronous:progress "Battery Low" "Hybrid-Sleeping in $((60 - number)) seconds"
-            sleep 1;
+            notify-send -u critical -t 60000 -h string:int:value:$progress -h string:synchronous:progress "Battery Low" "hibernate_enabled: $hibernate_enabled\nHybrid-Sleeping in $((60 - number)) seconds"
+            sleep 1
         done
         dunstctl close
 
 
-        i3lock-fancy && systemctl hybrid-sleep;
-        # if [ "$status" = "Discharging" ] && [ "$hibernate_enabled" = true ]; then
-        #     i3lock-fancy & systemctl hybrid-sleep
-        # fi
+        # i3lock-fancy && systemctl hybrid-sleep;
+        if [ "$status" = "Discharging" ] && [ "$hibernate_enabled" = true ]; then
+            if command -v i3lock-fancy >/dev/null 2>&1; then
+                i3lock-fancy & systemctl hybrid-sleep
+            elif command -v i3lock >/dev/null 2>&1; then
+                i3lock & systemctl hybrid-sleep
+            else
+                notify-send -u critical "Error: Lock utility not found" "Please install either 'i3lock-fancy' or 'i3lock' for hybrid sleep to work."
+                printf "Error: Lock utility not found\nPlease install either 'i3lock-fancy' or 'i3lock' for hybrid sleep to work.\n"
+                exit 1
+            fi
+        fi
 
     elif [ "$capacity" -lt 26 ];
     then

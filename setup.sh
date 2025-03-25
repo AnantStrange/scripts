@@ -1,110 +1,92 @@
 #!/bin/bash
 
-wm_urls=(
-    "https://github.com/AnantStrange/dwm.git"
-    "https://github.com/AnantStrange/dmenu.git"
-    "https://github.com/AnantStrange/st.git"
-    "https://github.com/AnantStrange/dwmblocks.git"
-    "https://github.com/AnantStrange/tabbed.git"
-)
-
+# Define URLs for the repositories
 urls=(
-    "https://github.com/AnantStrange/dotfiles.git ~/.dotfiles"
-    "https://github.com/AnantStrange/scripts.git ~/scripts"
-    "https://github.com/AnantStrange/Wallpapers.git ~/Wallpapers/"
-    "https://github.com/AnantStrange/password-store.git ~/.local/share/.password-store"
+    "https://github.com/AnantStrange/dwm.git"
+    "https://github.com/AnantStrange/dwmblocks.git"
+    "https://github.com/AnantStrange/dmenu.git"
+    "https://github.com/AnantStrange/tabbed.git"
+    "https://github.com/AnantStrange/st.git"
 
-    "https://github.com/agkozak/zsh-z.git ~/.local/share/zsh/zsh-z"
-    "https://github.com/zsh-users/zsh-autosuggestions.git ~/.local/share/zsh/zsh-autosuggestions"
-    "https://github.com/zdharma-continuum/fast-syntax-highlighting.git ~/.local/share/zsh/fast-syntax-highlight"
-    "https://github.com/marlonrichert/zsh-autocomplete.git ~/.local/share/zsh/zsh-autocomplete"
-    "https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm"
+    "https://github.com/AnantStrange/password-store.git"
+
+    "https://github.com/AnantStrange/dotfiles.git"
+    "https://github.com/AnantStrange/scripts.git"
+
+    "https://github.com/AnantStrange/Wallpapers.git"
 )
 
-mkdir -p ~/wm ~/Downloads ~/work ~/.local ~/.local/share ~/local/share/zsh ~/.config
+# Define categories
+wm_repos=("dwm" "dwmblocks" "dmenu" "tabbed" "st")
+general_repos=("dotfiles" "scripts")
+misc_repos=("password-store","Wallpapers")
 
-echo -e "\e[34m\n############################### Cloning repositories into wm directory ###############################\e[0m\n"
-for url in "${wm_urls[@]}"; do
-    echo -e "\e[33mCloning $url into wm dir...\n\e[0m"
-    git clone "$url" "wm/$(basename "$url" .git)"
-done
-echo -e "\e[34m\n############################# Finished cloning repositories into wm directory ############################\e[0m\n"
-
-echo -e "\e[34m\n########################### Cloning repositories ###########################\e[0m\n"
-for url in "${urls[@]}"; do
-    repo_url="${url%% *}"  # Extracting the repository URL part
-    dest="${url#* }"       # Extracting the destination directory part
-
-    # Only prompt for specific repositories
-    case "$repo_url" in
-        "https://github.com/AnantStrange/password-store.git" | \
-        "https://github.com/AnantStrange/Wallpapers.git" | \
-        "https://github.com/tmux-plugins/tpm")
-            read -p "Do you want to clone $repo_url into $dest? (yes/no): " choice
-            if [[ $choice == "yes" ]]; then
-                echo -e "\e[33m\nCloning $repo_url into $dest...\n\e[0m"
-                git clone "$repo_url" "$dest"
-            fi
-            ;;
-        *)  # For all other repositories, clone without confirmation
-            echo -e "\033[33m\nCloning $repo_url into $dest...\n\033[0m"
-            git clone "$repo_url" "$dest"
-            ;;
+# Function to prompt user for confirmation
+prompt_user() {
+    local category="$1"
+    read -p "Do you want to clone $category repositories? (y/n): " choice
+    case "$choice" in
+        y|Y) return 0 ;;
+        n|N) return 1 ;;
+        *) echo "Invalid choice. Please enter y or n." ; prompt_user "$category" ;;
     esac
-done
-echo -e "\e[34m\n############################## Finished cloning repositories ##############################\e[0m\n"
+}
 
+# Function to clone repositories
+clone_repos() {
+    local category="$1"
+    local repos=("${!2}")
+    local target_dir="$3"
 
-echo -e "\e[31m\n############################## Stowing Dotfiles ##############################\e[0m\n"
-if cd "$HOME/.dotfiles"; then
-    subdirs=$(find . -mindepth 1 -maxdepth 1 -type d ! -name ".git")
-    for dir in $subdirs; do
-        # Get the directory name without './'
-        dir_name=$(basename "$dir")
-        
-        read -p "Do you want to stow $dir_name directory? (yes/no)[yes]: " choice
-        if [ -z "$choice" ] || [[ $choice == "yes" ]] ; then
-            echo -e "\e[33mStowing $dir_name directory...\e[0m"
-            stow "$dir_name"
-        else
-            echo -e "\e[33mSkipping stow for $dir_name directory.\e[0m"
-        fi
+    echo "Cloning $category repositories into $target_dir..."
+    mkdir -p "$target_dir"
+    for repo in "${repos[@]}"; do
+        for url in "${urls[@]}"; do
+            if [[ "$url" == *"$repo"* ]]; then
+                echo "Cloning $repo..."
+                git clone "$url" "$target_dir/$repo"
+                break
+            fi
+        done
     done
-    echo -e "\e[31m\n############################## Finished Stowing Dotfiles ##############################\e[0m\n"
-else
-    echo -e "\e[31mError: Unable to navigate to ~/.dotfiles directory.\e[0m"
+}
+
+# Function to install WM-related repositories
+install_wm_repos() {
+    local wm_dir="$HOME/wm"
+    for repo in "${wm_repos[@]}"; do
+        echo "Installing $repo..."
+        cd "$wm_dir/$repo" || { echo "Failed to cd into $wm_dir/$repo"; exit 1; }
+        sudo make clean install
+    done
+}
+
+# Function to handle dotfiles submodule
+handle_dotfiles_submodule() {
+    local dotfiles_dir="$HOME/.dotfiles"
+    echo "Initializing and updating submodules for dotfiles..."
+    cd "$dotfiles_dir" || { echo "Failed to cd into $dotfiles_dir"; exit 1; }
+    git submodule update --init --recursive
+}
+
+# Main script logic
+
+# Clone WM-related repositories
+if prompt_user "Window Manager"; then
+    clone_repos "Window Manager" wm_repos[@] "$HOME/wm"
+    install_wm_repos
 fi
-echo -e "\e[31m\n############################## Finished Stowing Dotfiles ##############################\e[0m\n"
 
+# Clone General repositories
+if prompt_user "General"; then
+    clone_repos "General" general_repos[@] "$HOME/.dotfiles"
+    handle_dotfiles_submodule
+    clone_repos "General" general_repos[@] "$HOME/scripts"
+fi
 
-echo -e "\n\e[34m############################## Compiling repositories in wm directory ##############################\e[0m\n"
-success=()
-failed=()
+# Clone Misc repositories
+if prompt_user "Miscellaneous"; then
+    clone_repos "Miscellaneous" misc_repos[@] "$HOME/.local/share/.password-store"
+fi
 
-# Compile each repository in wm dir
-for dir in wm/*; do
-    echo -e "\e[33mCompiling $dir...\e[0m\n"  # Yellow color for compiling
-    cd "$dir"
-    sudo make install | tee output.txt
-    if [ $? -eq 0 ]; then
-        echo -e "\e[32mCompilation successful for $dir\e[0m"  # Green color for successful compilations
-        success+=("$dir")
-    else
-        echo -e "\e[31mCompilation failed for $dir\e[0m"  # Red color for failed compilations
-        failed+=("$dir")
-    fi
-    cd ~
-done
-
-# Report successful and failed compilations
-echo -e "\n\e[32mSuccessful compilations:\e[0m"  # Green color for successful compilations
-for repo in "${success[@]}"; do
-    echo -e "\e[32m- $repo\e[0m"  # Green color for successful compilations
-done
-
-echo -e "\n\e[31mFailed compilations:\e[0m"  # Red color for failed compilations
-for repo in "${failed[@]}"; do
-    echo -e "\e[31m- $repo\e[0m"  # Red color for failed compilations
-done
-echo -e "\n\e[34m############################## Finished compiling repositories ##############################\e[0m\n"
-
+echo "Setup complete!"

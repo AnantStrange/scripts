@@ -9,7 +9,7 @@ from email.mime.multipart import MIMEMultipart
 # Configuration
 urls = [
     "https://strangeworld.blog",
-    "https://git.strangeworld.blog",
+    # "https://git.strangeworld.blog",
     "https://serve.strangeworld.blog/",
 ]
 
@@ -63,13 +63,13 @@ def send_email(message):
 def send_notification(message):
     # Send a desktop notification using notify-send
     try:
-        subprocess.run(["notify-send", "-u critical","Website Status Alert", message])
+        subprocess.run(["notify-send", "-u", "critical","Website Status Alert", message])
         print("Desktop notification sent!")
     except Exception as e:
         print(f"Failed to send desktop notification: {e}")
 
 if __name__ == "__main__":
-    # check_websites()
-    send_email("testing u idiot")
+    check_websites()
+    # send_email("testing u idiot")
 
 

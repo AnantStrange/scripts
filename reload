@@ -1,30 +1,47 @@
-#! /bin/zsh
+#!/usr/bin/env bash
 
-[ -n "$1" ] && a=$1 || a=$(printf "Dwmblocks\nSXHKD\nDWM\nDunst\nTransmission\nI2P Router\nPicom\nJamesDSP" | dmenu -p "Reload >")
+if [ -n "$1" ]; then
+    a="$1"
+else
+    a=$(printf "Dwmblocks\nSXHKD\nDWM\nDunst\nTransmission\nI2P Router\nPicom\nJamesDSP\nWallpaper" | dmenu -p "Reload >")
+fi
 
-case "${a:l}" in 
+case "${a,,}" in  # Fix lowercase conversion using bash 4+ syntax
     "dwmblocks")
-        if [ -n "$(pidof dwmblocks)" ]
-        then
-            a=$(printf "Restart\nKill" | dmenu -p "Dwmblocks is already running. What to do? >");
-            [ -z "$a" ] && exit;
-            [ "$a" = "Restart" ] && (killall dwmblocks;dwmblocks & disown;return 0 ) || (killall dwmblocks)
-
+        if pidof dwmblocks >/dev/null; then
+            a=$(printf "Restart\nKill" | dmenu -p "Dwmblocks is already running. What to do? >")
+            if [ -z "$a" ]; then
+                exit
+            elif [ "$a" = "Restart" ]; then
+                killall dwmblocks
+                dwmblocks & disown
+            else
+                killall dwmblocks
+            fi
         else
-            a=$(printf "Start"| dmenu -p "Dwmblocks is not running. What to do? >")
-            [ -z "$a" ] && exit || (dwmblocks &)
+            a=$(printf "Start" | dmenu -p "Dwmblocks is not running. What to do? >")
+            if [ -n "$a" ]; then
+                dwmblocks &
+            fi
         fi
         ;;
 
     "dunst")
-        if [ -n "$(pidof dunst)" ]
-        then
+        if pidof dunst >/dev/null; then
             a=$(printf "Restart\nKill" | dmenu -p "Dunst is already running. What to do? >")
-            [ -z "$a" ] && exit;
-            [ "$a" = "Restart" ] && (killall dunst;dunst & disown;return 0 ) || (killall dunst)
+            if [ -z "$a" ]; then
+                exit
+            elif [ "$a" = "Restart" ]; then
+                killall dunst
+                dunst & disown
+            else
+                killall dunst
+            fi
         else
-            a=$(printf "Start"| dmenu -p "Dunst is not running. What to do? >")
-            [ -z "$a" ] && exit || (dunst &)
+            a=$(printf "Start" | dmenu -p "Dunst is not running. What to do? >")
+            if [ -n "$a" ]; then
+                dunst &
+            fi
         fi
         ;;
 
@@ -33,65 +50,101 @@ case "${a:l}" in
         ;;
 
     "picom")
-        if [ -n "$(pidof picom)" ]
-        then
+        if pidof picom >/dev/null; then
             a=$(printf "Restart\nKill" | dmenu -p "Picom is already running. What to do? >")
-            [ -z "$a" ] && exit;
-            [ "$a" = "Restart" ] && (killall picom;lnch picom;return 0) || (killall picom)
+            if [ -z "$a" ]; then
+                exit
+            elif [ "$a" = "Restart" ]; then
+                killall picom
+                lnch picom
+            else
+                killall picom
+            fi
         else
-            a=$(printf "Start"| dmenu -p "Picom is not running. What to do? >")
-            [ -z "$a" ] && exit || (lnch picom)
+            a=$(printf "Start" | dmenu -p "Picom is not running. What to do? >")
+            if [ -n "$a" ]; then
+                lnch picom
+            fi
         fi
         ;;
-        
 
     "sxhkd")
-        if [ -n "$(pidof sxhkd)" ]
-        then
+        if pidof sxhkd >/dev/null; then
             a=$(printf "Restart\nKill" | dmenu -p "SXHKD is already running. What to do? >")
-            [ -z "$a" ] && exit;
-            [ "$a" = "Restart" ] && (killall -SIGUSR1 sxhkd;return 0) || (killall sxhkd)
+            if [ -z "$a" ]; then
+                exit
+            elif [ "$a" = "Restart" ]; then
+                killall -SIGUSR1 sxhkd
+            else
+                killall sxhkd
+            fi
         else
-            a=$(printf "Start"| dmenu -p "SXHKD is not running. What to do? >")
-            [ -z "$a" ] && exit || (sxhkd &)
+            a=$(printf "Start" | dmenu -p "SXHKD is not running. What to do? >")
+            if [ -n "$a" ]; then
+                sxhkd &
+            fi
         fi
         ;;
 
     "transmission")
-        if [ -n "$(pidof transmission-daemon)" ]
-        then
-            a=$(printf "Restart\nStop")
-            [ -z "$a" ] && exit;
-            [ "$a" = "Restart" ] && systemctl restart transmission || systemctl stop transmission
+        if pidof transmission-daemon >/dev/null; then
+            a=$(printf "Restart\nStop" | dmenu -p "Transmission is running. What to do? >")
+            if [ -z "$a" ]; then
+                exit
+            elif [ "$a" = "Restart" ]; then
+                systemctl restart transmission
+            else
+                systemctl stop transmission
+            fi
         else
-            a=$(printf "Start"| dmenu -p "Transmission Daemon not running. What to do? >")
-            [ -z "$a" ] && exit || systemctl start transmission
+            a=$(printf "Start" | dmenu -p "Transmission Daemon not running. What to do? >")
+            if [ -n "$a" ]; then
+                systemctl start transmission
+            fi
         fi
         ;;
 
     "i2p router")
-        if i2prouter status | grep -q 'not running' 
-        then
+        if i2prouter status | grep -q 'not running'; then
             a=$(printf "Start" | dmenu -p "I2P is not running. What to do? >")
-            [ -z "$a" ] && exit;
-            [ "$a" = "Start" ] && out=$(i2prouter start)
+            if [ -n "$a" ]; then
+                out=$(i2prouter start)
+            fi
         else
             a=$(printf "Stop" | dmenu -p "I2P is running. What to do? >")
-            [ -z "$a" ] && exit || out=$(i2prouter stop)
+            if [ -n "$a" ]; then
+                out=$(i2prouter stop)
+            fi
         fi
         ;;
 
     "jamesdsp")
-        if [ -n "$(pidof jamesdsp)" ]
-        then
-            a=$(printf "Restart\nStop")
-            [ -z "$a" ] && exit;
-            [ "$a" = "Restart" ] && killall jamesdsp && jamesdsp -t || jamesdsp -t
+        if pidof jamesdsp >/dev/null; then
+            a=$(printf "Toggle\nRestart\nKill" | dmenu -p "JamesDSP is running. What to do? >")
+            if [ -z "$a" ]; then
+                exit
+            elif [ "$a" = "Restart" ]; then
+                killall jamesdsp
+                jamesdsp -t
+            elif [ "$a" = "Toggle" ]; then
+                jdsp_toggle.sh
+            else
+                killall jamesdsp
+            fi
         else
-            a=$(printf "Start"| dmenu -p "JamesDSP Daemon not running. What to do? >")
-            [ -z "$a" ] && exit || jamesdsp -t;
+            a=$(printf "Start" | dmenu -p "JamesDSP Daemon not running. What to do? >")
+            if [ -n "$a" ]; then
+                jamesdsp -t
+            fi
         fi
+        ;;
+
+    "wallpaper")
+        tree -ifa ~/Wallpapers | grep -E "png|jpg|jpeg" > /tmp/wallpaper_list
         ;;
 esac
 
-[ -n "$a" ] && [ -n  "$out" ] && dunstify "$a" "$out"
+if [[ -n "$a" && -n "$out" ]]; then
+    dunstify "$a" "$out"
+fi
+

@@ -24,7 +24,7 @@ scan_networks() {
 # Function to handle SSID selection
 select_ssid() {
     while true; do
-        choice=$(scan_networks | dmenu -p "Select SSID :")
+        choice=$(scan_networks | dmenu -l 10 -p "Select SSID :")
 
         # Check if user chose to rescan
         if [ "$choice" = "rescan" ]; then
@@ -88,6 +88,7 @@ connect_network() {
 }
 
 # Main script execution
+notify-send -u normal "Wi-Fi Connection" "Scanning SSID..."
 while true; do
     # Select SSID and check if rescan is requested
     if ! select_ssid; then
