@@ -8,29 +8,39 @@ show_usage() {
     echo "Usage: $0 [-s] [-f] [-n]"
     echo "  -s   Take a screenshot of a selected area."
     echo "  -f   Capture the entire screen."
-    echo "  -n   Capture the entire screen with a custom name (prompted via dmenu)."
+    echo "  -n   Prompt for a custom name using dmenu."
     exit 1
 }
 
+# Flags
+selection=false
+fullscreen=false
+named=false
+
 while getopts "sfn" opt; do
     case "$opt" in
-        s)  # Selection mode
-            FILE="$SAVE_DIR/$DEFAULT_NAME"
-            maim -f png -m 10 -s | tee "$FILE" | xclip -selection clipboard -t image/png
-            ;;
-        f)  # Fullscreen mode
-            FILE="$SAVE_DIR/$DEFAULT_NAME"
-            maim -f png -m 10 | tee "$FILE" | xclip -selection clipboard -t image/png
-            ;;
-        n)  # Named screenshot using dmenu
-            NAME=$(echo "" | dmenu -p "Enter screenshot name:")
-            [[ -z "$NAME" ]] && exit 1  # Exit if no name is provided
-            FILE="$SAVE_DIR/${NAME}.png"
-            maim -f png -m 10 | tee "$FILE" | xclip -selection clipboard -t image/png
-            ;;
-        *)  # Invalid flag
-            show_usage
-            ;;
+        s) selection=true ;;
+        f) fullscreen=true ;;
+        n) named=true ;;
+        *) show_usage ;;
     esac
 done
+
+# Determine filename
+if $named; then
+    NAME=$(echo "" | dmenu -p "Enter screenshot name:")
+    [[ -z "$NAME" ]] && exit 1
+    FILE="$SAVE_DIR/${NAME}.png"
+else
+    FILE="$SAVE_DIR/$DEFAULT_NAME"
+fi
+
+# Capture
+if $selection; then
+    maim -f png -u -m 10 -s | tee "$FILE" | xclip -selection clipboard -t image/png
+elif $fullscreen; then
+    maim -f png -u -m 10 | tee "$FILE" | xclip -selection clipboard -t image/png
+else
+    show_usage
+fi
 

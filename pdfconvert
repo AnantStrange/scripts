@@ -29,6 +29,11 @@ mkdir -p "$output_dir"
 for file in "$input_dir"/*; do
     if [ -f "$file" ]; then
         filename=$(basename -- "$file")
+         # Skip if the file is already a PDF
+        if [[ "$filename" == *.pdf ]]; then
+            echo "Skipping (already PDF): $filename"
+            continue
+        fi
         echo "Converting: $filename"
 
         # Convert file to PDF
