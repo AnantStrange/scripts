@@ -1,0 +1,5 @@
+#!/usr/bin/env sh
+
+path=$(which "$1");
+exec nvim "$path" 
+

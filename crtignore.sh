@@ -44,14 +44,6 @@ __pycache__/
 # Ignore Rope project directory
 .ropeproject/
 
-# Ignore IDE/editor specific files
-*.swp
-*.swo
-
-# Ignore common system files
-.DS_Store
-Thumbs.db
-
 # Ignore other potential temporary files
 *.log
 *.tmp

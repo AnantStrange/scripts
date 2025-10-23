@@ -1,4 +1,9 @@
-#!/bin/sh
+#!/bin/bash
+
+LOCK_FILE_NAME="dmenu_wifi.lock"
+LOCK_FILE_PATH="/var/lock"
+LOCK_FILE="$LOCK_FILE_PATH/$LOCK_FILE_NAME"
+
 
 # Function to scan networks and output SSID and Security
 scan_networks() {
@@ -24,23 +29,26 @@ scan_networks() {
 # Function to handle SSID selection
 select_ssid() {
     while true; do
-        choice=$(scan_networks | dmenu -l 10 -p "Select SSID :")
-
-        # Check if user chose to rescan
-        if [ "$choice" = "rescan" ]; then
-            return 1  # Indicate that rescan is requested
+        networks=$(scan_networks)
+        if [[ -z "$networks" ]]; then
+            notify-send "Wi-Fi Connection" "No networks found\nRescanning ..."
+            echo "No networks found, rescanning..."
+            sleep 2
+        elif [[ -n "$networks" ]]; then
+            choice=$(echo "$networks" | dmenu -l 20 -p "Select SSID:")
+            if [ -z "$choice" ]; then
+                notify-send "Wi-Fi Connection" "No SSID selected or script exited."
+                exit 1
+            elif [[ -n "$choice" ]] && [[ "$choice" == "rescan" ]]; then
+                echo "rescanning..."
+                notify-send "Wi-Fi Connection" "Rescanning ..."
+                sleep 2
+                continue
+            fi
+            ssid=$(echo "$choice" | awk -F " Security: " '{print $1}')
+            security=$(echo "$choice" | awk -F " Security: " '{print $2}')
+            return 0 # Indicate successful SSID selection
         fi
-
-        # Exit if no SSID selected
-        if [ -z "$choice" ]; then
-            notify-send "Wi-Fi Connection" "No SSID selected or script exited."
-            exit 1
-        fi
-
-        # Extract SSID and security type
-        ssid=$(echo "$choice" | awk -F " Security: " '{print $1}')
-        security=$(echo "$choice" | awk -F " Security: " '{print $2}')
-        return 0  # Indicate successful SSID selection
     done
 }
 
@@ -54,15 +62,15 @@ prompt_password() {
                 echo "Exiting..."
                 exit 0
             elif [ "$password" = "rescan" ]; then
-                return 1  # Indicate that rescan is requested
+                return 1 # Indicate that rescan is requested
             elif [ -n "$password" ]; then
-                break  # Exit the password prompt loop with a valid password
+                break # Exit the password prompt loop with a valid password
             fi
         else
-            break  # Exit the password prompt loop if the network is open
+            break # Exit the password prompt loop if the network is open
         fi
     done
-    return 0  # Indicate that password was provided
+    return 0 # Indicate that password was provided
 }
 
 # Function to connect to the network
@@ -88,17 +96,19 @@ connect_network() {
 }
 
 # Main script execution
+if [[ -e "$LOCK_FILE" ]];then 
+    notify-send -u normal "Wi-Fi Connection" "Script Already running ..\n Lock File - '$LOCK_FILE' "
+else
+    touch "$LOCK_FILE";
+fi
+
 notify-send -u normal "Wi-Fi Connection" "Scanning SSID..."
 while true; do
-    # Select SSID and check if rescan is requested
-    if ! select_ssid; then
-        continue  # Restart the entire process if rescan is requested
-    fi
-
+    select_ssid 
     while true; do
         # Prompt for password and check if rescan is requested
         if ! prompt_password; then
-            break  # Exit the password prompt loop to restart the SSID selection process
+            break # Exit the password prompt loop to restart the SSID selection process
         fi
 
         connect_network
@@ -106,3 +116,4 @@ while true; do
     done
 done
 
+rm "$LOCK_FILE";

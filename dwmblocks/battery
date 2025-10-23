@@ -1,6 +1,7 @@
 #!/bin/sh
 # Prints all batteries, their percentage remaining and an emoji corresponding
 # to charge status (🔌 for plugged up, 🔋 for discharging on battery, etc.).
+lock_path="/tmp/battery_script.lock"
 
 case $BLOCK_BUTTON in
     3) notify-send "🔋 Battery module" "🔋: discharging
@@ -35,7 +36,9 @@ for battery in /sys/class/power_supply/BAT?*; do
     printf "%s%s%d%%" "$status" "$warn" "$capacity"; unset warn
 done && printf "\\n"
 
-status=$(cat /sys/class/power_supply/BAT0/status)
+[ -e "$lock_path" ] && exit 0;
+touch "$lock_path"
+status="$(cat /sys/class/power_supply/BAT0/status)"
 
 if [[ "$status" = "Discharging" || "$status" = "Not charging" || "$status" = "Unknown" ]];
 then
@@ -91,3 +94,4 @@ then
     notify-send "Charging full" "Remove charger."
 fi 
 
+[ -e "$lock_path" ] && rm "$lock_path"

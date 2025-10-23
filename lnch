@@ -1,8 +1,6 @@
 #!/bin/bash
+#!/bin/bash
 
-# Loop through each argument passed to the script
-for program in "$@"; do
-    # Launch the program in the background and redirect both stdout and stderr to /dev/null
-    "$program" >/dev/null 2>&1 &
-done
+# Run all args as a single command in background, discard stdout and stderr
+"$@" >/dev/null 2>&1 &
 
