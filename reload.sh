@@ -56,14 +56,14 @@ case "${a,,}" in  # Fix lowercase conversion using bash 4+ syntax
                 exit
             elif [ "$a" = "Restart" ]; then
                 killall picom
-                lnch picom
+                lnch.sh picom
             else
                 killall picom
             fi
         else
             a=$(printf "Start" | dmenu -p "Picom is not running. What to do? >")
             if [ -n "$a" ]; then
-                lnch picom
+                lnch.sh picom
             fi
         fi
         ;;

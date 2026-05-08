@@ -1,5 +1,4 @@
-#!/bin/bash
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Run all args as a single command in background, discard stdout and stderr
 "$@" >/dev/null 2>&1 &

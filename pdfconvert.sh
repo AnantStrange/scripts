@@ -1,4 +1,4 @@
-#!/bin/sh
+#! /usr/bin/env zsh
 
 show_help() {
     echo "Usage: $0 [input_directory] [output_directory]"
@@ -7,10 +7,10 @@ show_help() {
     exit 0
 }
 
-# Show help if --help is passed
-if [ "$1" = "--help" ]; then
-    show_help
-fi
+# Show help if -h|--help is passed
+case "$1" in
+    -h|--help) show_help;;
+esac
 
 # Check if LibreOffice is installed
 if ! command -v libreoffice >/dev/null 2>&1; then

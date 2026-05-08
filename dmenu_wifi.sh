@@ -1,14 +1,14 @@
-#!/bin/bash
+#!/usr/bin/env zsh
 
 LOCK_FILE_NAME="dmenu_wifi.lock"
-LOCK_FILE_PATH="/var/lock"
+LOCK_FILE_PATH="/tmp/"
 LOCK_FILE="$LOCK_FILE_PATH/$LOCK_FILE_NAME"
-
+SSID_LOCK="StrangeSpot"
 
 # Function to scan networks and output SSID and Security
 scan_networks() {
     printf "rescan\n"
-    sudo iwlist wlp3s0 scan | awk -F: '
+    iwlist wlp3s0 scan | awk -F: '
         /Cell/ { cell = $0 }
         /ESSID/ { ssid = $2 }
         /IE: WPA/ { security = "WPA" }
@@ -95,11 +95,34 @@ connect_network() {
     fi
 }
 
+# Setup trap to remove lock on script exit
+trap 'rm -f "$LOCK_FILE"' EXIT
+
 # Main script execution
 if [[ -e "$LOCK_FILE" ]];then 
     notify-send -u normal "Wi-Fi Connection" "Script Already running ..\n Lock File - '$LOCK_FILE' "
+    exit 1;
 else
     touch "$LOCK_FILE";
+fi
+
+if [ -n "$SSID_LOCK" ]; then
+    dunstify "dmenu_wifi" "Running in SSID_LOCK mode\nSSID : $SSID_LOCK"
+    counter=0;
+    while true; do
+        if [[ $counter -gt 2 ]];then
+            nmcli device wifi list --rescan yes;
+            counter=0;
+        fi
+        nmcli device wifi connect "$SSID_LOCK"
+        if [ $? -eq 0 ];then
+            dunstify "Wi-Fi Connection" "Successfully connected to $SSID_LOCK."
+            break;
+        fi
+        ((counter++));
+    done
+    rm "$LOCK_FILE";
+    exit 0;
 fi
 
 notify-send -u normal "Wi-Fi Connection" "Scanning SSID..."
@@ -112,7 +135,7 @@ while true; do
         fi
 
         connect_network
-        exit 0
+        # exit 0
     done
 done
 

@@ -32,32 +32,32 @@ file=$(echo "$content" | dmenu -i -l 20  -p "File :")
 
 # If --dragon is used and a directory is selected, list its contents instead
 if [ "$dragon" = true ] && [ -d "$file" ]; then
-    lnch dragon-drop "$file"/*
+    lnch.sh dragon-drop "$file"/*
     exit 0
 fi
 
 # If --dragon or -d was passed, open with dragon-drop and exit
 if [ "$dragon" = true ]; then
-    lnch dragon-drop "$file"
+    lnch.sh dragon-drop "$file"
     exit 0
 fi
 
 file_type=$(file -b "$file")
 case "$file_type" in 
     *"PDF"*)
-        lnch zathura "$file";
+        lnch.sh zathura "$file";
         ;;
     *"MP4"* | *"video"* | *"matroska"*)
-        lnch mpv "$file";
+        lnch.sh mpv "$file";
         ;;
     *"shell"*)
-        lnch st -e nvim "$file";
+        lnch.sh st -e nvim "$file";
         ;;
     *"directory"*)
         choice=$(printf "mpv\nCopy Path\nnvim\nterminal\nthunar" | dmenu -i -p "Choose >");
         case "$choice" in
             "mpv")
-                lnch mpv "$file";
+                lnch.sh mpv "$file";
                 ;;
             "Copy Path")
                 xclip "$file";
@@ -66,10 +66,10 @@ case "$file_type" in
                 st -e nvim "$file";
                 ;;
             "terminal")
-                lnch st -e cd "$file";
+                lnch.sh st -e cd "$file";
                 ;;
             "thunar")
-                lnch thunar "$file";
+                lnch.sh thunar "$file";
                 ;;
             *)
                 exit 0;
@@ -77,7 +77,7 @@ case "$file_type" in
         esac;;
     *)
         echo cached;
-        lnch xdg-open "$file"
+        lnch.sh xdg-open "$file"
         ;;
 esac
 

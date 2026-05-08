@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env zsh
 
 music=$(mpc listall | dmenu -f -l 10 -p "Music >")
 [ -z "$music" ] && exit;

@@ -1,72 +1,79 @@
-#! /bin/bash
+#!/bin/bash
 
-# Define the default audio sink
-SINK="@DEFAULT_AUDIO_SINK@"
-SOURCE="@DEFAULT_AUDIO_SOURCE@"
+# Define the default audio sink/source using pactl syntax
+SINK="@DEFAULT_SINK@"
+SOURCE="@DEFAULT_SOURCE@"
+LOCKFILE="/tmp/audio-control.lock"
+REFR_SIG="21"
 
-# Get the current volume
+# Notification IDs for replacement (fixed numbers for each type)
+SPEAKER_NID=1001
+MIC_NID=1002
+MUTE_NID=1003
+
+# Try to acquire lock, exit if another instance is running
+exec 9>"$LOCKFILE"
+if ! flock -n 9; then
+    # Another instance is running, exit silently
+    exit 0
+fi
+
+# Get the current volume using pactl
 get_speaker_volume() {
-    wpctl get-volume "$SINK"  | awk '{print $2}' | sed 's/\[MUTED\]//; s/[^0-9.]//g' | awk '{printf "%.0f%%\n", $1 * 100}'
+    pactl get-sink-volume "$SINK" | grep -oP '\d+%' | head -1 | tr -d '%'
 }
 
 get_mic_volume() {
-    wpctl get-volume "$SOURCE" | awk '{print $2}' | sed 's/\[MUTED\]//; s/[^0-9.]//g' | awk '{printf "%.0f%%\n", $1 * 100}'
+    pactl get-source-volume "$SOURCE" | grep -oP '\d+%' | head -1 | tr -d '%'
 }
 
 get_speaker_mute_status() {
-    wpctl get-volume "$SINK" | grep -q '\[MUTED\]' && echo "Muted" || echo "Unmuted"
+    pactl get-sink-mute "$SINK" | grep -q "yes" && echo "Muted" || echo "Unmuted"
 }
 
 get_mic_mute_status() {
-    wpctl get-volume "$SOURCE" | grep -q '\[MUTED\]' && echo "Muted" || echo "Unmuted"
+    pactl get-source-mute "$SOURCE" | grep -q "yes" && echo "Muted" || echo "Unmuted"
 }
-
 
 # Adjust volume or toggle mute
 case "$1" in
     speaker-increase)
-        wpctl set-volume $SINK "$2"%+ & pkill -RTMIN+21 dwmblocks
+        pactl set-sink-volume "$SINK" "+$2%"
         volume=$(get_speaker_volume)
-        notify-send -t 5000 -h int:value:"$volume" -h string:synchronous:progress "Volume" "$volume"
+        dunstify -r $SPEAKER_NID -t 2000 -h int:value:"$volume" "Volume" "$volume%"
         ;;
     speaker-decrease)
-        wpctl set-volume $SINK "$2"%- & pkill -RTMIN+21 dwmblocks
+        pactl set-sink-volume "$SINK" "-$2%"
         volume=$(get_speaker_volume)
-        notify-send -t 5000 -h int:value:"$volume" -h string:synchronous:progress "Volume" "$volume"
+        dunstify -r $SPEAKER_NID -t 2000 -h int:value:"$volume" "Volume" "$volume%"
         ;;
     speaker-toggle-mute)
+        pactl set-sink-mute "$SINK" toggle
         volume=$(get_speaker_volume)
-        if [[ $(get_speaker_mute_status) == "Muted" ]]; then
-            notify-send -t 5000 -h int:value:"$volume" -h string:synchronous:progress "Volume" "Unmuted $volume"
-        else
-            notify-send -t 5000 -h int:value:"$volume" -h string:synchronous:progress "Volume" "Muted $volume"
-        fi
-        wpctl set-mute "$SINK" toggle
-        pkill -RTMIN+21 dwmblocks
+        status=$(get_speaker_mute_status)
+        dunstify -r $MUTE_NID -t 2000 -h int:value:"$volume" "Volume" "$status $volume%"
         ;;
     mic-increase)
-        wpctl set-volume "$SOURCE" "$2"%+ & pkill -RTMIN+21 dwmblocks
+        pactl set-source-volume "$SOURCE" "+$2%"
         volume=$(get_mic_volume)
-        notify-send -t 5000 -h int:value:"$volume" -h string:synchronous:progress "Mic Volume" "$volume"
+        dunstify -r $MIC_NID -t 2000 -h int:value:"$volume" "Mic Volume" "$volume%"
         ;;
     mic-decrease)
-        wpctl set-volume "$SOURCE" "$2"%- & pkill -RTMIN+21 dwmblocks
+        pactl set-source-volume "$SOURCE" "-$2%"
         volume=$(get_mic_volume)
-        notify-send -t 5000 -h int:value:"$volume" -h string:synchronous:progress "Mic Volume" "$volume"
+        dunstify -r $MIC_NID -t 2000 -h int:value:"$volume" "Mic Volume" "$volume%"
         ;;
     mic-toggle-mute)
+        pactl set-source-mute "$SOURCE" toggle
         volume=$(get_mic_volume)
-        if [[ $(get_mic_mute_status) == "Muted" ]]; then
-            notify-send -t 5000 -h int:value:"$volume" -h string:synchronous:progress "Mic Volume" "Unmuted $volume"
-        else
-            notify-send -t 5000 -h int:value:"$volume" -h string:synchronous:progress "Mic Volume" "Muted $volume"
-        fi
-        wpctl set-mute "$SOURCE" toggle
-        pkill -RTMIN+21 dwmblocks
+        status=$(get_mic_mute_status)
+        dunstify -r $MUTE_NID -t 2000 -h int:value:"$volume" "Mic Volume" "$status $volume%"
         ;;
     *)
-        echo "Usage: basename $0 {speaker-increase|speaker-decrease|speaker-toggle-mute|mic-increase|mic-decrease|mic-toggle-mute} [amount]"
+        echo "Usage: $0 {speaker-increase|speaker-decrease|speaker-toggle-mute|mic-increase|mic-decrease|mic-toggle-mute} [amount]"
         exit 1
         ;;
 esac
 
+# Refresh dwmblocks (uncomment if you want this)
+pkill -RTMIN+$REFR_SIG dwmblocks &

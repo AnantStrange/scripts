@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env zsh
 
 tmp_file="$HOME/.local/share/quickedit.txt"
 ignore="nvim|paru|cache|Steam|anaconda|oh-my-zsh|Trash|plugins|Code|icons|extensions|repositories|cargo|site-packages|node_modules"

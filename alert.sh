@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 [ "$2" == "Battery Low" ] && exit 0
 [ "$2" == "Volume" ] && exit 0
